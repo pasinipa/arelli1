@@ -1,4 +1,10 @@
 #pragma once
-class ResonanceType {
-    
+
+class ResonanceType : public ParticleType
+{
+
+const double ResonanceLenght;
+public: 
+double ReturnResonance;
+
 }
