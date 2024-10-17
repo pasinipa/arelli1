@@ -8,9 +8,9 @@ class ParticleType {
     const double Mass;
     const int Charge;
     public:
-    void ReturnMass();
-    void ReturnCharge();
-    void ReturnParticleName();
-    
+    double ReturnMass();
+    int ReturnCharge();
+    char* ReturnParticleName();
+    void Print();
     
 }
