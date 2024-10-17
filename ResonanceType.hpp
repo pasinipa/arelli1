@@ -1,11 +1,14 @@
 #pragma once
+#include "ParticleType.hpp"
 
 class ResonanceType : public ParticleType
 {
+ private:
+  double width;
 
-const double ResonanceLenght;
-public: 
-double ReturnResonance();
-void Print(); //da ridefinire rispetto al metodo in particle.hpp
+ public:
+  ResonanceType(const std::string& name, double mass, int charge, double width);
+  double getWidth() const;
 
-}
+  void print() const override;
+};
