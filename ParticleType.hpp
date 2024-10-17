@@ -1,16 +1,16 @@
 #pragma once
-//#include <string>
-
+#include <string>
 
 class ParticleType {    
-    const char* ParticleName;
-    //std::string ParticleName;
-    const double Mass;
-    const int Charge;
-    public:
-    double ReturnMass();
-    int ReturnCharge();
-    char* ReturnParticleName();
-    void Print();
-    
-}
+  private:
+    const std::string particleName;
+    const double mass;
+    const int charge;
+
+  public:
+    ParticleType(const std::string& name, double mass, int charge);
+    double getMass() const;
+    int getCharge() const;
+    std::string getParticleName() const;
+    void print() const;
+};
