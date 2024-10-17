@@ -1,9 +1,14 @@
 #pragma once
+#include "ResonanceType.hpp"
+#include "ParticleType.hpp"
 
-class Particle : public ResonceType {
-    double impulse_X;
-    double impulse_Y;
-    double impulse_Z;  
+class Particle : public Particle {
+    double Px;
+    double Py;
+    double Pz;  
     int index;
+
+    static 
+
       
 }
