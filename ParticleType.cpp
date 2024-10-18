@@ -2,14 +2,33 @@
 #include <iostream>
 
 ParticleType::ParticleType(const std::string& name, double mass, int charge)
-    : particleName(name)
+    : name(name)
     , mass(mass)
     , charge(charge)
+    , resonanceWidth()
 {}
 
-std::string ParticleType::getParticleName() const
+ParticleType::ParticleType(const std::string& name, double mass, int charge, double width)
+    : name(name)
+    , mass(mass)
+    , charge(charge)
+    , resonanceWidth(width)
+{}
+
+void ParticleType::print() const
 {
-  return particleName;
+  std::cout << "Name: " << name << '\n' 
+            << "Mass: " << mass << '\n'
+            << "Charge: " << charge << '\n';
+  if (resonanceWidth.has_value()) 
+    std::cout << "Resonance Width: " << resonanceWidth.value() << '\n';
+  else 
+    std::cout << "Resonance Width: n/a" 
+}
+
+std::string ParticleType::getName() const
+{
+  return name;
 }
 double ParticleType::getMass() const
 {
@@ -20,8 +39,3 @@ int ParticleType::getCharge() const
   return charge;
 }
 
-void ParticleType::print() const
-{
-  std::cout << "Name: " << particleName << ".\n " << "Mass: " << mass << ".\n"
-            << "Charge: " << charge << std::endl;
-}
