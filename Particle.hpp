@@ -1,5 +1,5 @@
 #pragma once
-#include "ResonanceType.hpp"
+#include "particle_type.hpp"
 #include <array>
 #include <string>
 #include <vector>
@@ -10,22 +10,26 @@ class Particle
   std::array<double, 3> impulse;
   int index;
 
-  // potrebbe essere un std::set? e poi potremmo fare a meno di usare i puntatori...
-  //Pier: io terrei std::vector che a ducati l'arelli ha detto che va bene
-  static std::vector<ResonanceType*> typeTable;
-  static int findParticle(const std::string& name);
+  static std::vector<ParticleType> typeTable;
+  static std::map<std::string, int> indexTable;
 
  public:
-  Particle(const std::string& name, std::array<double, 3> impulse = {0, 0, 0});
-  static void addParticleType(const std::string& name, double mass, double charge, double width = 0);     // perchè non mettiamo al posto che in std::string name, double mass e double charge invece che int? 
+  Particle(const std::string& name, std::array<double, 3> impulse = {0., 0., 0.});
+
+  static void addParticleType(const std::string& name, ParticleType particleType);     
+  static void printTypeTable();
+
+  // perchè non mettiamo al posto che in std::string name, double mass e double charge invece che int? 
+
+  // Hai ragione, la massa dovrebbe essere un double. 
+  // La carica invece dato che è quantizzata basta un intero. 
+  // Anche perché in generale i computer sono stupidi nel fare operazioni con i numeri razionali. 
+  // Per dire può succedere che se gli chiedi di fare 3.f + 2.f  lui è capace di dirti che fa 5.00000003f
+  // (la 'f' dopo il numero indica che quei numeri il computer li deve interpretare come float)
+  // - Paolo
+  
   int getIndex() const;
-
-  void set_index(int);
-
-  void set_index_by_name(const std::string&);
-
-  static void PrintParticleTypes();
+  void setIndex(int);
+  void setIndex(const std::string&);
 };
-
-
 
