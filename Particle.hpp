@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-class Particle : public ResonanceType
+class Particle
 {
  private:
   std::array<double, 3> impulse;
