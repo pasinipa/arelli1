@@ -10,9 +10,9 @@ class ParticleType
   const int charge;
 
  public:
-  explicit ParticleType(std::string& name, double mass, int charge);
+  explicit ParticleType(const std::string& name, double mass, int charge);
   virtual ~ParticleType() {};
-  std::string& getName() const;
+  const std::string& getName() const;
   double getMass() const;
   int getCharge() const;
 
