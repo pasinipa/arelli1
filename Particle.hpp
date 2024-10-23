@@ -17,8 +17,8 @@ class Particle
   static std::map<std::string, int> indexTable;
 
  public:
-  Particle(const std::string& name,
-           std::array<double, 3> impulse = {0., 0., 0.});
+  explicit Particle(const std::string& name,
+                    std::array<double, 3> impulse = {0., 0., 0.});
 
   static void addParticleType(const std::string& name,
                               ParticleType particleType);
