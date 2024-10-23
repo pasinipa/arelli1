@@ -8,7 +8,7 @@ class ParticleType
   const std::string name;
   const double mass;
   const int charge;
-  const std::optional<double> resonanceWidth;
+  const std::optional<double> resonanceWidth;  //regaz avevavo detto che non facevamo con optional perchè lo mettiamo a zero il valore delle width per le nn resonance
 
  public:
   ParticleType(double mass, int charge);
