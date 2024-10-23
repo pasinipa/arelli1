@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include "ResonanceType.hpp"
 #include <array>
 #include <string>
 #include <vector>
