@@ -1,53 +1,33 @@
 #include "particle_type.hpp"
 #include <iostream>
 
-
-
-ParticleType::ParticleType(/*std::string name,*/ double mass, int charge)
-    :
-    //name(name) 
-    mass(mass)
-    , charge(charge)
-    , resonanceWidth()
+pt::ParticleType::ParticleType(std::string& name, double mass, int charge)
+    : name{name}
+    , mass{mass}
+    , charge{charge}
 {}
 
-ParticleType::ParticleType(/*std::string name,*/double mass, int charge, double width)
-    : 
-    //name(name)
-    mass(mass)
-    , charge(charge)
-    , resonanceWidth(width)
-{}
-
-void ParticleType::print() const
+const std::string& pt::ParticleType::getName() const
 {
-  std::cout /*<< "Name: " << name << '\n' */
-            << "Mass: " << mass << '\n'
-            << "Charge: " << charge << '\n';
-  if (resonanceWidth.has_value()) //dice se c'è la lunghezza d'onda o no
-    std::cout << "Resonance Width: " << resonanceWidth.value() << '\n';
-  else
-    std::cout << "Resonance Width: n/a";
+  return name;
 }
 
-
-//std::string ParticleType::getName() const
-//{
-//  return name;
-//}
-
-//double ParticleType::getWidth() const
-//{
-// return resonanceWidth;
-//}
-
-double ParticleType::getMass() const
+double pt::ParticleType::getMass() const
 {
   return mass;
 }
 
-int ParticleType::getCharge() const
+int pt::ParticleType::getCharge() const
 {
   return charge;
 }
 
+void pt::ParticleType::print() const
+{
+  std::cout << "Name: " << name << '\n'
+            << std::endl
+            << "Mass: " << mass << "kg \n"
+            << std::endl
+            << "Charge: " << charge << " e \n"
+            << std::endl;
+}

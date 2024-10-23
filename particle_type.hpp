@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 
+namespace pt {
 class ParticleType
 {
  private:
@@ -9,10 +10,12 @@ class ParticleType
   const int charge;
 
  public:
-  explicit ParticleType(std::string name, double mass, int charge);
-  std::string getName() const;
+  explicit ParticleType(std::string& name, double mass, int charge);
+  virtual ~ParticleType() {};
+  std::string& getName() const;
   double getMass() const;
   int getCharge() const;
 
   virtual void print() const;
 };
+} // namespace pt
