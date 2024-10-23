@@ -1,25 +1,26 @@
-#include <string>
+#include "particle.hpp"
 
-
-findParticle (std::string name) 
+Particle::Particle(const std::string& name, std::array<double, 3> impulse = {0, 0, 0}) : impulse{impulse}
 {
-    auto index = 0; 
-    for (name =! typeTable[index].name; index ++)   
-    return index;
-} 
-
-getNameArray (index) {
-    return typeTable[index].name
+  if (indexTable.contains(name))
+    index{indexTable[name]};
+  // else throw ? e poi stampare a schermo il fatto che c'è stato un problema
 }
 
-getMassArray (index) {
-    return typeTable[index].mass
+static void Particle::addParticleType(const std::string& name, const ParticleType& particleType) {
+  if (not indexTable.contains(name)){ 
+    // push_back or emplace?
+    typeTable.push_back(particleType);
+    indexTable.insert({name, --typeTable.size()});
+  }
+  //else non fa niente oppure aggiorna la sua definizione di quella particella?
 }
 
-getChargeArray (index) {
-    return typeTable[index].charge
+static void Particle::printTypeTable() {
+  for (const auto& t : typeTable) {
+    t.print();
+    std::cout << '\n';
+  }
 }
+  
 
-getWidthArray (index) {
-    return typeTable[index].width
-}
