@@ -40,20 +40,20 @@ class Particle
   // NParticleType tiene traccia del numero di tipi di particelle attualmente
   // definiti.
   int index;
-  // index è l'indice del tipo di particella corrente nell'array ParticleType.
+  // index è l'indice del tipo di particella corrente nel vector fParticleType.
   std::array<double, 3> P;
   // P è un array che contiene le componenti dell'impulso della particella.
 
   static int findParticle(const std::string& name);
-  // indParticle trova l'indice di un tipo di particella nell'array ParticleType
-  // in base al nome.
+  // indParticle trova l'indice di un tipo di particella nel vector
+  // fParticleType in base al nome.
 
  public:
   explicit Particle(const std::string&);
   explicit Particle(const std::string&, Impulse);
   // Costruttori: creano una particella e impostano il suo tipo e impulso.
 
-  const int getIndex() const;
+  int getIndex() const;
   // getIndex restituisce l'indice del tipo di particella.
   void setIndex(int);
   // setIndex imposta l'indice del tipo di particella in base a un valore
@@ -61,14 +61,14 @@ class Particle
   void setIndex(const std::string&);
   // setIndex imposta l'indice del tipo di particella in base al nome.
 
-  const Impulse& getImpulse() const;
+  Impulse getImpulse() const;
   // getImpulse restituisce l'impulso della particella.
   void setImpulse(Impulse);
   // setImpulse imposta l'impulso della particella.
 
   static void addParticleType(const std::string&, double, int, double = 0);
-  // addParticleType aggiunge un nuovo tipo di particella all'array
-  // ParticleType.
+  // addParticleType aggiunge un nuovo tipo di particella al vector
+  // fParticleType.
   static void printParticleType();
   // printParticleTypes stampa a schermo tutti i tipi di particelle definiti.
 
@@ -76,5 +76,10 @@ class Particle
   // print stampa a schermo le proprietà della particella corrente.
   const std::array<double, 3>& get_pulse() const;
   // get_pulse restituisce le componenti dell'impulso.
+
+  double getMass() const;
+  // getMass restituisce la massa della particella.
+  double getEnergy() const;
+  // getEnergy restituisce l'energia totale della particella.
 };
 } // namespace p
