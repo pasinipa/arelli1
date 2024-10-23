@@ -5,6 +5,7 @@
 class ParticleType
 {
  private:
+  const std::string name;
   const double mass;
   const int charge;
   const std::optional<double> resonanceWidth;
