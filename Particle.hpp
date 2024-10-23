@@ -13,8 +13,11 @@ class Particle
   std::array<double, 3> impulse;
   int index;
 
-  static std::vector<ParticleType> typeTable;
-  static std::map<std::string, int> indexTable;
+    auto getNameArray(int index);
+    auto getMassArray(int index);
+    auto getChargeArray(int index);
+    auto getWidthArray(int index);
+    auto getImpulse(int index);
 
  public:
   explicit Particle(const std::string& name,
