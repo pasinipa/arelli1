@@ -2,10 +2,11 @@
 #include "particle_type.hpp"
 #include <array>
 #include <iostream>
+#include <map>
 #include <string>
 #include <vector>
 
-namespace p{
+namespace p {
 class Particle
 {
  private:
@@ -27,4 +28,4 @@ class Particle
   void setIndex(int);
   void setIndex(const std::string&);
 };
-} // namespace
+} // namespace p
