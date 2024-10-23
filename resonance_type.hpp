@@ -8,7 +8,7 @@ class ResonanceType : public pt::ParticleType
   const double width;
 
  public:
-  explicit ResonanceType(std::string& name, double mass, int charge,
+  explicit ResonanceType(const std::string& name, double mass, int charge,
                          double width);
   double getWidth() const;
 
