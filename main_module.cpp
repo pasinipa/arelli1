@@ -4,31 +4,18 @@
 #include <TRandom.h>
 #include <iostream>
 
-int mainModule()
+int main()
 {
-  gRandom->SetSeed();
+  gRandom->SetSeed(); // Set the seed for the random number generator
 
-Particle:
-addParticleType:
-  ("Pione+", 0.13957, +1);
-Particle:
-addParticleType:
-  ("Pione-", 0.13957, -1);
-Particle:
-addParticleType:
-  ("Kaone+", 0.49367, +1);
-Particle:
-addParticleType:
-  ("Kaone-", 0.49637, -1);
-Particle:
-addParticleType:
-  ("Protone+", 0.93827, +1);
-Particle:
-addParticleType:
-  ("Protone-", 0.93827, -1);
-Particle:
-addParticleType:
-  ("K*", 0.89166, 0, 0.050);
+  // Aggiungi i tipi di particelle
+  p::Particle::addParticleType("Pione+", 0.13957, +1);
+  p::Particle::addParticleType("Pione-", 0.13957, -1);
+  p::Particle::addParticleType("Kaone+", 0.49367, +1);
+  p::Particle::addParticleType("Kaone-", 0.49367, -1);
+  p::Particle::addParticleType("Protone+", 0.93827, +1);
+  p::Particle::addParticleType("Protone-", 0.93827, -1);
+  p::Particle::addParticleType("K*", 0.89166, 0, 0.050);
 
   return 0;
 }
