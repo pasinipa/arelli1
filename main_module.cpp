@@ -8,25 +8,25 @@ int mainModule()
 {
   gRandom->SetSeed();
 
-Particle:
+Particle::
 addParticleType:
   ("Pione+", 0.13957, +1);
-Particle:
+Particle::
 addParticleType:
   ("Pione-", 0.13957, -1);
-Particle:
+Particle::
 addParticleType:
   ("Kaone+", 0.49367, +1);
-Particle:
+Particle::
 addParticleType:
   ("Kaone-", 0.49637, -1);
-Particle:
+Particle::
 addParticleType:
   ("Protone+", 0.93827, +1);
-Particle:
+Particle::
 addParticleType:
   ("Protone-", 0.93827, -1);
-Particle:
+Particle::
 addParticleType:
   ("K*", 0.89166, 0, 0.050);
 
