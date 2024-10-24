@@ -35,6 +35,7 @@ class Particle
   static int findParticle(const std::string& name);
 
  public:
+  Particle() = default;
   explicit Particle(const std::string&);
   explicit Particle(const std::string&, Impulse);
 
