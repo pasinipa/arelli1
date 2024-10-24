@@ -119,32 +119,58 @@ void Particle::printParticleType()
 
 int Particle::Decay2Body(Particle& dau1, Particle& dau2) const
 {
-  if (getMass() == 0)
+  if (getMass() == 0.0) {
+    printf("Decayment cannot be preformed if mass is zero\n");
     return 1;
+  }
 
-  double mass1 = dau1.getMass();
-  double mass2 = dau2.getMass();
-  if (mass1 + mass2 > getMass())
+  double massMot  = getMass();
+  double massDau1 = dau1.getMass();
+  double massDau2 = dau2.getMass();
+
+  if (fIParticle > -1) { // add width effect
+
+    // gaussian random numbers
+
+    float x1, x2, w, y1;
+
+    double invnum = 1. / RAND_MAX;
+    do {
+      x1 = 2.0 * rand() * invnum - 1.0;
+      x2 = 2.0 * rand() * invnum - 1.0;
+      w  = x1 * x1 + x2 * x2;
+    } while (w >= 1.0);
+
+    w  = sqrt((-2.0 * log(w)) / w);
+    y1 = x1 * w;
+
+    massMot += fParticleType[fIParticle]->GetWidth() * y1;
+  }
+
+  if (massMot < massDau1 + massDau2) {
+    printf("Decayment cannot be preformed because mass is too low in this "
+           "channel\n");
     return 2;
+  }
 
-  double energy     = getEnergy();
-  double massParent = getMass();
-  double p = std::sqrt((energy * energy - (mass1 + mass2) * (mass1 + mass2))
-                       * (energy * energy - (mass1 - mass2) * (mass1 - mass2)))
-           / (2 * massParent);
+  double p =
+      sqrt(
+          (massMot * massMot - (massDau1 + massDau2) * (massDau1 + massDau2))
+          * (massMot * massMot - (massDau1 - massDau2) * (massDau1 - massDau2)))
+      / massMot * 0.5;
 
-  std::random_device rd;
-  std::mt19937 gen(rd());
-  std::uniform_real_distribution<> dis(0, 2 * M_PI);
-  double theta = dis(gen);
-  double phi   = dis(gen);
+  double norm = 2 * M_PI / RAND_MAX;
 
+  double phi   = rand() * norm;
+  double theta = rand() * norm * 0.5 - M_PI / 2.;
   dau1.setImpulse({p * std::sin(theta) * std::cos(phi),
                    p * std::sin(theta) * std::sin(phi), p * std::cos(theta)});
   dau2.setImpulse({-p * std::sin(theta) * std::cos(phi),
                    -p * std::sin(theta) * std::sin(phi), -p * std::cos(theta)});
 
-  // Boost the daughter particles
+  double energy =
+      sqrt(P[0] * P[0] + P[1] * P[1] + P[2] * P[2] + massMot * massMot);
+
   double bx = P[0] / energy;
   double by = P[1] / energy;
   double bz = P[2] / energy;
@@ -153,6 +179,20 @@ int Particle::Decay2Body(Particle& dau1, Particle& dau2) const
   dau2.Boost(bx, by, bz);
 
   return 0;
+}
+void Particle::Boost(double bx, double by, double bz)
+{
+  double energy = getEnergy();
+
+  // Boost this Lorentz vector
+  double b2     = bx * bx + by * by + bz * bz;
+  double gamma  = 1.0 / sqrt(1.0 - b2);
+  double bp     = bx * P[0] + by * P[1] + bz * P[2];
+  double gamma2 = b2 > 0 ? (gamma - 1.0) / b2 : 0.0;
+
+  P[0] = P[0] + gamma2 * bp * bx + gamma * bx * getEnergy();
+  P[1] = P[1] + gamma2 * bp * by + gamma * by * getEnergy();
+  P[2] = P[2] + gamma2 * bp * bz + gamma * bz * getEnergy();
 }
 
 } // namespace p
