@@ -1,6 +1,6 @@
 // Do NOT change. Changes will be lost next time file is generated
 
-#define R__DICTIONARY_FILENAME particle_type
+#define R__DICTIONARY_FILENAME paeticle_type
 #define R__NO_DEPRECATION
 
 /*******************************************************************/
@@ -43,7 +43,7 @@
 namespace std {} using namespace std;
 
 namespace {
-  void TriggerDictionaryInitialization_particle_type_Impl() {
+  void TriggerDictionaryInitialization_paeticle_type_Impl() {
     static const char* headers[] = {
 "particle_type.hpp",
 nullptr
@@ -54,14 +54,14 @@ nullptr
 nullptr
     };
     static const char* fwdDeclCode = R"DICTFWDDCLS(
-#line 1 "particle_type dictionary forward declarations' payload"
+#line 1 "paeticle_type dictionary forward declarations' payload"
 #pragma clang diagnostic ignored "-Wkeyword-compat"
 #pragma clang diagnostic ignored "-Wignored-attributes"
 #pragma clang diagnostic ignored "-Wreturn-type-c-linkage"
 extern int __Cling_AutoLoading_Map;
 )DICTFWDDCLS";
     static const char* payloadCode = R"DICTPAYLOAD(
-#line 1 "particle_type dictionary payload"
+#line 1 "paeticle_type dictionary payload"
 
 
 #define _BACKWARD_BACKWARD_WARNING_H
@@ -75,18 +75,18 @@ nullptr
 };
     static bool isInitialized = false;
     if (!isInitialized) {
-      TROOT::RegisterModule("particle_type",
+      TROOT::RegisterModule("paeticle_type",
         headers, includePaths, payloadCode, fwdDeclCode,
-        TriggerDictionaryInitialization_particle_type_Impl, {}, classesHeaders, /*hasCxxModule*/false);
+        TriggerDictionaryInitialization_paeticle_type_Impl, {}, classesHeaders, /*hasCxxModule*/false);
       isInitialized = true;
     }
   }
   static struct DictInit {
     DictInit() {
-      TriggerDictionaryInitialization_particle_type_Impl();
+      TriggerDictionaryInitialization_paeticle_type_Impl();
     }
   } __TheDictionaryInitializer;
 }
-void TriggerDictionaryInitialization_particle_type() {
-  TriggerDictionaryInitialization_particle_type_Impl();
+void TriggerDictionaryInitialization_paeticle_type() {
+  TriggerDictionaryInitialization_paeticle_type_Impl();
 }
