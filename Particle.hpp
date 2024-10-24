@@ -2,6 +2,7 @@
 #include "resonance_type.hpp"
 #include <array>
 #include <iostream>
+#include <random>
 #include <vector>
 
 namespace p {
@@ -32,6 +33,7 @@ class Particle
   int index;
   std::array<double, 3> P;
   static int findParticle(const std::string& name);
+  void Boost(double bx, double by, double bz);
 
  public:
   explicit Particle(const std::string&);
@@ -53,6 +55,8 @@ class Particle
 
   double getMass() const;
   double getEnergy() const;
+
+  int Decay2Body(Particle& dau1, Particle& dau2) const;
 };
 } // namespace p
 
@@ -141,5 +145,8 @@ class Particle
 //   // getMass restituisce la massa della particella.
 //   double getEnergy() const;
 //   // getEnergy restituisce l'energia totale della particella.
+//   int Decay2Body(Particle &dau1, Particle &dau2) const
+//   // Decay2Body simula il decadimento della particella corrente in due
+//   particelle figlie.
 // };
 // } // namespace p

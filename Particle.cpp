@@ -1,6 +1,8 @@
 #include "Particle.hpp"
 #include <cmath>
 #include <cstring>
+#include <random>
+#include <stdexcept>
 
 namespace p {
 std::vector<pt::ParticleType*> Particle::fParticleType;
@@ -113,6 +115,44 @@ void Particle::printParticleType()
   for (int i = 0; i < NParticleType; ++i) {
     fParticleType[i]->print();
   }
+}
+
+int Particle::Decay2Body(Particle& dau1, Particle& dau2) const
+{
+  if (getMass() == 0)
+    return 1;
+
+  double mass1 = dau1.getMass();
+  double mass2 = dau2.getMass();
+  if (mass1 + mass2 > getMass())
+    return 2;
+
+  double energy     = getEnergy();
+  double massParent = getMass();
+  double p = std::sqrt((energy * energy - (mass1 + mass2) * (mass1 + mass2))
+                       * (energy * energy - (mass1 - mass2) * (mass1 - mass2)))
+           / (2 * massParent);
+
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_real_distribution<> dis(0, 2 * M_PI);
+  double theta = dis(gen);
+  double phi   = dis(gen);
+
+  dau1.setImpulse({p * std::sin(theta) * std::cos(phi),
+                   p * std::sin(theta) * std::sin(phi), p * std::cos(theta)});
+  dau2.setImpulse({-p * std::sin(theta) * std::cos(phi),
+                   -p * std::sin(theta) * std::sin(phi), -p * std::cos(theta)});
+
+  // Boost the daughter particles
+  double bx = P[0] / energy;
+  double by = P[1] / energy;
+  double bz = P[2] / energy;
+
+  dau1.Boost(bx, by, bz);
+  dau2.Boost(bx, by, bz);
+
+  return 0;
 }
 
 } // namespace p
