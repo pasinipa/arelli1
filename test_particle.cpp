@@ -57,4 +57,25 @@ TEST_CASE("Particle class tests")
   double protonEnergy = proton.getEnergy();
   CHECK(protonEnergy
         == doctest::Approx(std::sqrt(1.6726219e-27 * 1.6726219e-27 + 1.0)));
+
+  // Test Boost
+  p::Particle particle("Proton", {1.0, 1.0, 1.0});
+  particle.Boost(0.1, 0.2, 0.3);
+  p::Impulse boostedImpulse = particle.getImpulse();
+  CHECK(boostedImpulse.px_ != 1.0); // The values should change after the boost
+  CHECK(boostedImpulse.py_ != 1.0);
+  CHECK(boostedImpulse.pz_ != 1.0);
+
+  // Test Decay2Body
+  p::Particle parent("Proton", {0.0, 0.0, 0.0});
+  p::Particle daughter1("Electron");
+  p::Particle daughter2("Electron");
+  int decayResult = parent.Decay2Body(daughter1, daughter2);
+  CHECK(decayResult == 0); // Check that the decay was successful
+
+  // Verify impulses of daughters are not zero
+  p::Impulse dau1Impulse = daughter1.getImpulse();
+  p::Impulse dau2Impulse = daughter2.getImpulse();
+  CHECK(dau1Impulse.px_ != 0.0);
+  CHECK(dau2Impulse.px_ != 0.0);
 }

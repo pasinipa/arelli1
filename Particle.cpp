@@ -128,7 +128,7 @@ int Particle::Decay2Body(Particle& dau1, Particle& dau2) const
   double massDau1 = dau1.getMass();
   double massDau2 = dau2.getMass();
 
-  if (fIParticle > -1) { // add width effect
+  if (index > -1) { // add width effect
 
     // gaussian random numbers
 
@@ -144,7 +144,7 @@ int Particle::Decay2Body(Particle& dau1, Particle& dau2) const
     w  = sqrt((-2.0 * log(w)) / w);
     y1 = x1 * w;
 
-    massMot += fParticleType[fIParticle]->GetWidth() * y1;
+    massMot += fParticleType[index]->getWidth() * y1;
   }
 
   if (massMot < massDau1 + massDau2) {

@@ -33,7 +33,6 @@ class Particle
   int index;
   std::array<double, 3> P;
   static int findParticle(const std::string& name);
-  void Boost(double bx, double by, double bz);
 
  public:
   explicit Particle(const std::string&);
@@ -56,6 +55,7 @@ class Particle
   double getMass() const;
   double getEnergy() const;
 
+  void Boost(double bx, double by, double bz);
   int Decay2Body(Particle& dau1, Particle& dau2) const;
 };
 } // namespace p

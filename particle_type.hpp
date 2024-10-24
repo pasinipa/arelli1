@@ -15,6 +15,10 @@ class ParticleType
   const std::string& getName() const;
   double getMass() const;
   int getCharge() const;
+  virtual double getWidth() const
+  {
+    return 0.0;
+  };
 
   virtual void print() const;
 };
