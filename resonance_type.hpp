@@ -10,7 +10,7 @@ class ResonanceType : public pt::ParticleType
  public:
   explicit ResonanceType(const std::string& name, double mass, int charge,
                          double width);
-  double getWidth() const;
+  double getWidth() const override;
 
   void print() const override;
 };

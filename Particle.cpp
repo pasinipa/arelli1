@@ -144,7 +144,7 @@ int Particle::Decay2Body(Particle& dau1, Particle& dau2) const
     w  = sqrt((-2.0 * log(w)) / w);
     y1 = x1 * w;
 
-    massMot += ResonanceType[index]->getWidth() * y1;
+    massMot += fParticleType[index]->getWidth() * y1;
   }
 
   if (massMot < massDau1 + massDau2) {
