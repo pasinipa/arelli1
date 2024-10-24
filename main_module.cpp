@@ -13,7 +13,7 @@ int mainModule() {
     p::Particle::addParticleType:("Kaone-",0.49637,-1);
     p::Particle::addParticleType:("Protone+",0.93827,+1);
     p::Particle::addParticleType:("Protone-",0.93827,-1);
-    p:: Particle::addParticleType:("K*",0.89166,0,0.050);
+    p::Particle::addParticleType:("K*",0.89166,0,0.050);
 
 return 0;
 
