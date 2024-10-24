@@ -4,7 +4,7 @@
 #include <TRandom.h>
 #include <iostream>
 
-int main()
+int mainModule()
 {
   gRandom->SetSeed();
 
