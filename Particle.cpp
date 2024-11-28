@@ -4,120 +4,36 @@
 #include <random>
 #include <stdexcept>
 
-namespace p {
-std::vector<pt::ParticleType*> Particle::fParticleType;
-int Particle::NParticleType = 0;
 
-Particle::Particle(const std::string& name)
-    : Particle(name, {0, 0, 0})
-{}
+namespace lab {
 
-Particle::Particle(const std::string& name, Impulse impulse)
-    : P{impulse.px_, impulse.py_, impulse.pz_}
-{
-  index = findParticle(name);
-  if (index == -1) {
-    std::cout << "Particle type not found!" << std::endl;
-  }
-}
+std::vector<ParticleType> Particle::particleTypeTable_;
+const int Particle::maxNumParticleTypes_ {10};
 
 int Particle::findParticle(const std::string& name)
 {
-  for (int i = 0; i < NParticleType; ++i) {
-    if (fParticleType[i]->getName() == name) {
-      return i;
-    }
+  for (int i {0}; i < particleTypeTable_.size(); ++i) {
+    if (particleTypeTable_[i].getName() == name) return i;
   }
   return -1;
 }
 
-int Particle::getIndex() const
-{
-  return index;
-}
 
-void Particle::setIndex(int idx)
+Particle::Particle(const std::string& name)
+    : Particle(name, {0., 0., 0.})
+{}
+
+Particle::Particle(const std::string& name, const Array3D& impulse)
+    : P_{impulse}
 {
-  if (idx >= 0 && idx < NParticleType) {
-    index = idx;
-  } else {
-    std::cout << "Index out of bounds!" << std::endl;
+  typeID_ = findParticle(name);
+  if (typeID_ == -1) {
+    std::cout << "Particle type not found!" << '\n';
   }
+  // should throw an exception here to prevent construction of an invalid object
 }
 
-void Particle::setIndex(const std::string& name)
-{
-  int idx = findParticle(name);
-  if (idx != -1) {
-    index = idx;
-  } else {
-    std::cout << "Particle type not found!" << std::endl;
-  }
-}
-
-void Particle::setImpulse(Impulse impulse)
-{
-  P[0] = impulse.px_;
-  P[1] = impulse.py_;
-  P[2] = impulse.pz_;
-}
-
-Impulse Particle::getImpulse() const
-{
-  return {P[0], P[1], P[2]};
-}
-
-double Particle::getMass() const
-{
-  return fParticleType[index]->getMass();
-}
-
-double Particle::getEnergy() const
-{
-  double m         = getMass();
-  double p_squared = P[0] * P[0] + P[1] * P[1] + P[2] * P[2];
-  return std::sqrt(m * m + p_squared);
-}
-
-void Particle::addParticleType(const std::string& name, double mass, int charge,
-                               double width)
-{
-  if (NParticleType < maxNumParticleType) {
-    if (findParticle(name) == -1) {
-      if (width == 0) {
-        fParticleType.push_back(new pt::ParticleType(name, mass, charge));
-      } else {
-        fParticleType.push_back(
-            new rt::ResonanceType(name, mass, charge, width));
-      }
-      ++NParticleType;
-    } else {
-      std::cout << "Particle type already exists!" << std::endl;
-    }
-  } else {
-    std::cout << "Maximum number of particle types reached!" << std::endl;
-  }
-}
-
-void Particle::Print() const
-{
-  if (index != -1) {
-    fParticleType[index]->print();
-    std::cout << "Impulse: (" << P[0] << ", " << P[1] << ", " << P[2] << ")"
-              << std::endl;
-  } else {
-    std::cout << "Particle type not found!" << std::endl;
-  }
-}
-
-void Particle::printParticleType()
-{
-  for (int i = 0; i < NParticleType; ++i) {
-    fParticleType[i]->print();
-  }
-}
-
-int Particle::Decay2Body(Particle& dau1, Particle& dau2) const
+int Particle::decay2Body(Particle& dau1, Particle& dau2) const
 {
   if (getMass() == 0.0) {
     printf("Decayment cannot be preformed if mass is zero\n");
@@ -128,7 +44,7 @@ int Particle::Decay2Body(Particle& dau1, Particle& dau2) const
   double massDau1 = dau1.getMass();
   double massDau2 = dau2.getMass();
 
-  if (index > -1) { // add width effect
+  if (typeID_ > -1) { // add width effect
 
     // gaussian random numbers
 
@@ -144,7 +60,7 @@ int Particle::Decay2Body(Particle& dau1, Particle& dau2) const
     w  = sqrt((-2.0 * log(w)) / w);
     y1 = x1 * w;
 
-    massMot += fParticleType[index]->getWidth() * y1;
+    massMot += particleTypeTable_[typeID_].getWidth() * y1;
   }
 
   if (massMot < massDau1 + massDau2) {
@@ -169,165 +85,109 @@ int Particle::Decay2Body(Particle& dau1, Particle& dau2) const
                    -p * std::sin(theta) * std::sin(phi), -p * std::cos(theta)});
 
   double energy =
-      sqrt(P[0] * P[0] + P[1] * P[1] + P[2] * P[2] + massMot * massMot);
+      sqrt(P_[0] * P_[0] + P_[1] * P_[1] + P_[2] * P_[2] + massMot * massMot);
 
-  double bx = P[0] / energy;
-  double by = P[1] / energy;
-  double bz = P[2] / energy;
+  double bx = P_[0] / energy;
+  double by = P_[1] / energy;
+  double bz = P_[2] / energy;
 
-  dau1.Boost(bx, by, bz);
-  dau2.Boost(bx, by, bz);
+  dau1.boost(bx, by, bz);
+  dau2.boost(bx, by, bz);
 
   return 0;
 }
-void Particle::Boost(double bx, double by, double bz)
+
+void Particle::boost(double bx, double by, double bz)
 {
   double energy = getEnergy();
 
   // Boost this Lorentz vector
   double b2     = bx * bx + by * by + bz * bz;
   double gamma  = 1.0 / sqrt(1.0 - b2);
-  double bp     = bx * P[0] + by * P[1] + bz * P[2];
+  double bp     = bx * P_[0] + by * P_[1] + bz * P_[2];
   double gamma2 = b2 > 0 ? (gamma - 1.0) / b2 : 0.0;
 
-  P[0] = P[0] + gamma2 * bp * bx + gamma * bx * getEnergy();
-  P[1] = P[1] + gamma2 * bp * by + gamma * by * getEnergy();
-  P[2] = P[2] + gamma2 * bp * bz + gamma * bz * getEnergy();
+  P_[0] += gamma2 * bp * bx + gamma * bx * getEnergy();
+  P_[1] += gamma2 * bp * by + gamma * by * getEnergy();
+  P_[2] += gamma2 * bp * bz + gamma * bz * getEnergy();
 }
 
-} // namespace p
+void Particle::print() const
+{
+  if (typeID_ == -1) {
+    std::cout << "Particle type not found!" << '\n';
+    return;
+  }
+  particleTypeTable_[typeID_].print();
+  std::cout << "Impulse: (" << P_[0] << ", " << P_[1] << ", " << P_[2] << ")" << '\n';
+}
 
-// #include "Particle.hpp"
-// #include <cmath>
-// #include <cstring> // Per usare strcmp
+void Particle::addParticleType(const std::string& name, double mass, int charge,
+                               double width)
+{
+  if (particleTypeTable_.size() >= maxNumParticleTypes_) {
+    std::cout << "Maximum number of particle types reached!" << '\n';
+    return;
+  }
+  if (findParticle(name) != -1) {
+    std::cout << "Particle type already exists!" << '\n';
+    return;
+  }
+  if (width == 0.) particleTypeTable_.push_back(ParticleType(name, mass, charge)); 
+  else particleTypeTable_.push_back(ResonanceType(name, mass, charge, width));
+  }
 
-// namespace p {
+void Particle::printParticleTypes()
+{
+  for (const auto& t: particleTypeTable_) t.print();
+}
 
-// // Definizione dei membri statici
-// std::vector<pt::ParticleType*> Particle::fParticleType;
-// int Particle::NParticleType = 0;
 
-// // Costruttore che inizializza una particella senza impulso specificato.
-// Particle::Particle(const std::string& name)
-//     : Particle(name, {0, 0, 0})
-// {}
 
-// // Costruttore che inizializza una particella con un impulso specificato.
-// Particle::Particle(const std::string& name, Impulse impulse)
-//     : P{impulse.px_, impulse.py_, impulse.pz_}
-// {
-//   index = findParticle(name);
-//   if (index == -1) {
-//     std::cout << "Particle type not found!" << std::endl;
-//   }
-// }
+void Particle::setTypeID(int id)
+{
+  if (id < 0 or id >= particleTypeTable_.size()) {
+    std::cout << "Index out of bounds!" << '\n';
+    return;
+  } 
+  typeID_ = id;
+}
 
-// // Metodo privato per trovare un tipo di particella nell'array in base al
-// nome. int Particle::findParticle(const std::string& name)
-// {
-//   for (int i = 0; i < NParticleType; ++i) {
-//     if (fParticleType[i]->getName() == name) {
-//       return i;
-//     }
-//   }
-//   return -1;
-// }
+void Particle::setTypeID(const std::string& name)
+{
+  int id = findParticle(name);
+  if (id == -1) {
+    std::cout << "Particle type not found!" << '\n';
+    return;
+  } 
+  typeID_ = id;
+}
 
-// // Restituisce l'indice del tipo di particella.
-// int Particle::getIndex() const
-// {
-//   return index;
-// }
+void Particle::setImpulse(const Array3D& impulse)
+{
+  P_ = impulse;
+}
 
-// // Imposta l'indice del tipo di particella in base a un valore intero.
-// void Particle::setIndex(int idx)
-// {
-//   if (idx >= 0 && idx < NParticleType) {
-//     index = idx;
-//   } else {
-//     std::cout << "Index out of bounds!" << std::endl;
-//   }
-// }
+int Particle::getTypeID() const
+{
+  return typeID_;
+}
 
-// // Imposta l'indice del tipo di particella in base al nome.
-// void Particle::setIndex(const std::string& name)
-// {
-//   int idx = findParticle(name);
-//   if (idx != -1) {
-//     index = idx;
-//   } else {
-//     std::cout << "Particle type not found!" << std::endl;
-//   }
-// }
+const Array3D& Particle::getImpulse() const
+{
+  return P_;
+}
 
-// // Imposta l'impulso della particella.
-// void Particle::setImpulse(Impulse impulse)
-// {
-//   P[0] = impulse.px_;
-//   P[1] = impulse.py_;
-//   P[2] = impulse.pz_;
-// }
+double Particle::getMass() const
+{
+  return particleTypeTable_[typeID_].getMass();
+}
 
-// // Restituisce l'impulso della particella.
-// Impulse Particle::getImpulse() const
-// {
-//   return {P[0], P[1], P[2]};
-// }
+double Particle::getEnergy() const
+{
+  double m {getMass()};
+  double p_squared {P_[0] * P_[0] + P_[1] * P_[1] + P_[2] * P_[2]};
+  return std::sqrt(m * m + p_squared);
+}
 
-// // Restituisce la massa della particella.
-// double Particle::getMass() const
-// {
-//   return fParticleType[index]->getMass();
-// }
-
-// // Restituisce l'energia totale della particella.
-// double Particle::getEnergy() const
-// {
-//   double m         = getMass();
-//   double p_squared = P[0] * P[0] + P[1] * P[1] + P[2] * P[2];
-//   return std::sqrt(m * m + p_squared);
-// }
-
-// // Aggiunge un nuovo tipo di particella all'array fParticleType.
-// void Particle::addParticleType(const std::string& name, double mass, int
-// charge,
-//                                double width)
-// {
-//   if (NParticleType < maxNumParticleType) {
-//     if (findParticle(name) == -1) {
-//       if (width == 0) {
-//         fParticleType.push_back(new pt::ParticleType(name, mass, charge));
-//       } else {
-//         fParticleType.push_back(
-//             new rt::ResonanceType(name, mass, charge, width));
-//       }
-//       ++NParticleType;
-//     } else {
-//       std::cout << "Particle type already exists!" << std::endl;
-//     }
-//   } else {
-//     std::cout << "Maximum number of particle types reached!" << std::endl;
-//   }
-// }
-
-// // Stampa a schermo le proprietà della particella corrente.
-// void Particle::Print() const
-// {
-//   if (index != -1) {
-//     fParticleType[index]->print();
-//     std::cout << "Impulse: (" << P[0] << ", " << P[1] << ", " << P[2] << ")"
-//               << std::endl;
-//   } else {
-//     std::cout << "Particle type not found!" << std::endl;
-//   }
-// }
-
-// // Stampa a schermo tutti i tipi di particelle definiti.
-// void Particle::printParticleType()
-// {
-//   for (int i = 0; i < NParticleType; ++i) {
-//     fParticleType[i]->print();
-//   }
-// }
-
-// } // namespace p
+} // namespace lab

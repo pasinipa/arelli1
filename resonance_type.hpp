@@ -1,17 +1,19 @@
 #pragma once
 #include "particle_type.hpp"
 
-namespace rt {
-class ResonanceType : public pt::ParticleType
-{
- private:
-  const double width;
+namespace lab {
 
+class ResonanceType : public ParticleType
+{
  public:
   explicit ResonanceType(const std::string& name, double mass, int charge,
                          double width);
   double getWidth() const override;
-
   void print() const override;
+
+ private:
+  const double width_; // expressed in eV
+
 };
-} // namespace rt
+
+} // namespace lab

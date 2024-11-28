@@ -1,17 +1,17 @@
 #include "resonance_type.hpp"
-#include <iostream>
 
-rt::ResonanceType::ResonanceType(const std::string& name, double mass,
+lab::ResonanceType::ResonanceType(const std::string& name, double mass,
                                  int charge, double width)
     : ParticleType{name, mass, charge}
-    , width{width} {};
-double rt::ResonanceType::getWidth() const
+    , width_{width} {};
+
+double lab::ResonanceType::getWidth() const
 {
-  return width;
+  return width_;
 }
 
-void rt::ResonanceType::print() const
+void lab::ResonanceType::print() const
 {
-  pt::ParticleType::print();
-  std::cout << "Resonance width: " << width << " eV" << std::endl;
+  ParticleType::print();
+  std::cout << "Resonance width: " << width_ << " eV" << '\n';
 }

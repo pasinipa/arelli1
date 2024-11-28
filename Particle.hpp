@@ -1,153 +1,52 @@
 #pragma once
 #include "resonance_type.hpp"
 #include <array>
-#include <iostream>
-#include <random>
 #include <vector>
+#include <numeric>
 
-namespace p {
-struct Impulse
-{
-  double px_;
-  double py_;
-  double pz_;
-};
+namespace lab {
+using Array3D = std::array<double, 3>;
 
-inline double normImpulse(Impulse impulse)
+inline double euclidianNorm(const Array3D& arr)
 {
-  return std::sqrt(impulse.px_ * impulse.px_ + impulse.py_ * impulse.py_
-                   + impulse.pz_ * impulse.pz_);
+  return std::sqrt(std::inner_product(arr.begin(), arr.end(), arr.begin(), 0.));
 }
 
-inline Impulse sumVecImpulse(const Impulse& p1, const Impulse& p2)
+inline Array3D array3DSum(const Array3D& p1, const Array3D& p2)
 {
-  return Impulse{p1.px_ + p2.px_, p1.py_ + p2.py_, p1.pz_ + p2.pz_};
+  return {p1[0] + p2[0], p1[1] + p2[1], p1[2] + p2[2]};
 }
+
 
 class Particle
 {
- private:
-  static const int maxNumParticleType{10};
-  static std::vector<pt::ParticleType*> fParticleType;
-  static int NParticleType;
-  int index;
-  std::array<double, 3> P;
-  static int findParticle(const std::string& name);
-
- public:
+  public:
   Particle() = default;
   explicit Particle(const std::string&);
-  explicit Particle(const std::string&, Impulse);
-
-  int getIndex() const;
-  void setIndex(int);
-  void setIndex(const std::string&);
-
-  Impulse getImpulse() const;
-  void setImpulse(Impulse);
+  explicit Particle(const std::string&, const Array3D&);
+  
+  void boost(double bx, double by, double bz);
+  int decay2Body(Particle& dau1, Particle& dau2) const;
+  void print() const;
 
   static void addParticleType(const std::string&, double, int, double = 0);
-  static void printParticleType();
+  static void printParticleTypes();
 
-  void Print() const;
-
-  const std::array<double, 3>& get_pulse() const;
-
+  void setTypeID(int);
+  void setTypeID(const std::string&);
+  void setImpulse(const Array3D&);
+  int getTypeID() const;
+  const Array3D& getImpulse() const;
   double getMass() const;
   double getEnergy() const;
 
-  void Boost(double bx, double by, double bz);
-  int Decay2Body(Particle& dau1, Particle& dau2) const;
+  private:
+  int typeID_; // an integer code representing the kind of particle
+  Array3D P_;  // the particle's momentum in cartesian coordinates
+  static std::vector<ParticleType> particleTypeTable_;
+  static const int maxNumParticleTypes_;
+  
+  static int findParticle(const std::string& name);
 };
-} // namespace p
 
-// #pragma once
-// #include "resonance_type.hpp"
-// #include <array>
-// #include <iostream>
-// #include <vector>
-
-// namespace p {
-// struct Impulse
-// {
-//   double px_;
-//   double py_;
-//   double pz_;
-// }; // Impulso rappresenta un vettore 3D delle componenti dell'impulso di una
-//    // particella.
-
-// inline double normImpulse(
-//     Impulse impulse) // normImpulse calcola la norma del vettore impulso.
-// {
-//   return std::sqrt(impulse.px_ * impulse.px_ + impulse.py_ * impulse.py_
-//                    + impulse.pz_ * impulse.pz_);
-// }
-
-// inline Impulse
-// sumVecImpulse(const Impulse& p1,
-//               const Impulse& p2) // sumVecImpulse calcola la somma vettoriale
-//               di
-//                                  // due impulsi.
-// {
-//   return Impulse{p1.px_ + p2.px_, p1.py_ + p2.py_, p1.pz_ + p2.pz_};
-// }
-
-// class Particle
-// {
-//  private:
-//   static const int maxNumParticleType{10};
-//   // maxNumParticleType è il numero massimo di tipi di particelle che
-//   possiamo
-//   // gestire.
-//   static std::vector<pt::ParticleType*> fParticleType;
-//   // ParticleType è un vector di puntatori a tipi di particelle.
-//   static int NParticleType;
-//   // NParticleType tiene traccia del numero di tipi di particelle attualmente
-//   // definiti.
-//   int index;
-//   // index è l'indice del tipo di particella corrente nel vector
-//   fParticleType. std::array<double, 3> P;
-//   // P è un array che contiene le componenti dell'impulso della particella.
-
-//   static int findParticle(const std::string& name);
-//   // indParticle trova l'indice di un tipo di particella nel vector
-//   // fParticleType in base al nome.
-
-//  public:
-//   explicit Particle(const std::string&);
-//   explicit Particle(const std::string&, Impulse);
-//   // Costruttori: creano una particella e impostano il suo tipo e impulso.
-
-//   int getIndex() const;
-//   // getIndex restituisce l'indice del tipo di particella.
-//   void setIndex(int);
-//   // setIndex imposta l'indice del tipo di particella in base a un valore
-//   // intero.
-//   void setIndex(const std::string&);
-//   // setIndex imposta l'indice del tipo di particella in base al nome.
-
-//   Impulse getImpulse() const;
-//   // getImpulse restituisce l'impulso della particella.
-//   void setImpulse(Impulse);
-//   // setImpulse imposta l'impulso della particella.
-
-//   static void addParticleType(const std::string&, double, int, double = 0);
-//   // addParticleType aggiunge un nuovo tipo di particella al vector
-//   // fParticleType.
-//   static void printParticleType();
-//   // printParticleTypes stampa a schermo tutti i tipi di particelle definiti.
-
-//   void Print() const;
-//   // print stampa a schermo le proprietà della particella corrente.
-//   const std::array<double, 3>& get_pulse() const;
-//   // get_pulse restituisce le componenti dell'impulso.
-
-//   double getMass() const;
-//   // getMass restituisce la massa della particella.
-//   double getEnergy() const;
-//   // getEnergy restituisce l'energia totale della particella.
-//   int Decay2Body(Particle &dau1, Particle &dau2) const
-//   // Decay2Body simula il decadimento della particella corrente in due
-//   particelle figlie.
-// };
-// } // namespace p
+} // namespace lab

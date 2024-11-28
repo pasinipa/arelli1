@@ -1,25 +1,24 @@
 #pragma once
 #include <string>
+#include <iostream>
 
-namespace pt {
+namespace lab {
+
 class ParticleType
 {
- private:
-  const std::string name;
-  const double mass;
-  const int charge;
-
  public:
   explicit ParticleType(const std::string& name, double mass, int charge);
   virtual ~ParticleType() {};
   const std::string& getName() const;
   double getMass() const;
   int getCharge() const;
-  virtual double getWidth() const
-  {
-    return 0.0;
-  };
-
+  virtual double getWidth() const;
   virtual void print() const;
+
+ private:
+  const std::string name_;
+  const double mass_;  // expressed in GeV/c^2
+  const int charge_;   // expressed as an integer multiple of the fundamental charge e
 };
-} // namespace pt
+
+} // namespace lab

@@ -1,33 +1,34 @@
 #include "particle_type.hpp"
-#include <iostream>
 
-pt::ParticleType::ParticleType(const std::string& name, double mass, int charge)
-    : name{name}
-    , mass{mass}
-    , charge{charge}
+lab::ParticleType::ParticleType(const std::string& name, double mass, int charge)
+    : name_{name}
+    , mass_{mass}
+    , charge_{charge}
 {}
 
-const std::string& pt::ParticleType::getName() const
+const std::string& lab::ParticleType::getName() const
 {
-  return name;
+  return name_;
 }
 
-double pt::ParticleType::getMass() const
+double lab::ParticleType::getMass() const
 {
-  return mass;
+  return mass_;
 }
 
-int pt::ParticleType::getCharge() const
+int lab::ParticleType::getCharge() const
 {
-  return charge;
+  return charge_;
 }
 
-void pt::ParticleType::print() const
+double lab::ParticleType::getWidth() const
 {
-  std::cout << "Name: " << name << '\n'
-            << std::endl
-            << "Mass: " << mass << "kg \n"
-            << std::endl
-            << "Charge: " << charge << " e \n"
-            << std::endl;
+  return 0.0;
+}
+
+void lab::ParticleType::print() const
+{
+  std::cout << "Name: " << name_ << '\n'
+            << "Mass: " << mass_ << "kg \n"
+            << "Charge: " << charge_ << " e \n";
 }
