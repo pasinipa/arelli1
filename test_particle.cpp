@@ -36,7 +36,8 @@ TEST_CASE("Particle class tests")
   CHECK(proton.getImpulse()[1] == doctest::Approx(1.0));
 
   // Test sumVecImpulse and normImpulse
-  lab::Array3D impulseSum = lab::array3DSum(electron.getImpulse(), proton.getImpulse());
+  lab::Array3D impulseSum =
+      lab::array3DSum(electron.getImpulse(), proton.getImpulse());
   CHECK(impulseSum[0] == doctest::Approx(1.0));
   CHECK(impulseSum[1] == doctest::Approx(1.0));
   CHECK(impulseSum[2] == doctest::Approx(0.0));

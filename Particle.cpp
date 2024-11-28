@@ -4,20 +4,19 @@
 #include <random>
 #include <stdexcept>
 
-
 namespace lab {
 
 std::vector<ParticleType> Particle::particleTypeTable_;
-const int Particle::maxNumParticleTypes_ {10};
+const int Particle::maxNumParticleTypes_{10};
 
 int Particle::findParticle(const std::string& name)
 {
-  for (int i {0}; i < particleTypeTable_.size(); ++i) {
-    if (particleTypeTable_[i].getName() == name) return i;
+  for (int i{0}; i < particleTypeTable_.size(); ++i) {
+    if (particleTypeTable_[i].getName() == name)
+      return i;
   }
   return -1;
 }
-
 
 Particle::Particle(const std::string& name)
     : Particle(name, {0., 0., 0.})
@@ -119,7 +118,8 @@ void Particle::print() const
     return;
   }
   particleTypeTable_[typeID_].print();
-  std::cout << "Impulse: (" << P_[0] << ", " << P_[1] << ", " << P_[2] << ")" << '\n';
+  std::cout << "Impulse: (" << P_[0] << ", " << P_[1] << ", " << P_[2] << ")"
+            << '\n';
 }
 
 void Particle::addParticleType(const std::string& name, double mass, int charge,
@@ -133,23 +133,24 @@ void Particle::addParticleType(const std::string& name, double mass, int charge,
     std::cout << "Particle type already exists!" << '\n';
     return;
   }
-  if (width == 0.) particleTypeTable_.push_back(ParticleType(name, mass, charge)); 
-  else particleTypeTable_.push_back(ResonanceType(name, mass, charge, width));
-  }
+  if (width == 0.)
+    particleTypeTable_.push_back(ParticleType(name, mass, charge));
+  else
+    particleTypeTable_.push_back(ResonanceType(name, mass, charge, width));
+}
 
 void Particle::printParticleTypes()
 {
-  for (const auto& t: particleTypeTable_) t.print();
+  for (const auto& t : particleTypeTable_)
+    t.print();
 }
-
-
 
 void Particle::setTypeID(int id)
 {
   if (id < 0 or id >= particleTypeTable_.size()) {
     std::cout << "Index out of bounds!" << '\n';
     return;
-  } 
+  }
   typeID_ = id;
 }
 
@@ -159,7 +160,7 @@ void Particle::setTypeID(const std::string& name)
   if (id == -1) {
     std::cout << "Particle type not found!" << '\n';
     return;
-  } 
+  }
   typeID_ = id;
 }
 
@@ -185,8 +186,8 @@ double Particle::getMass() const
 
 double Particle::getEnergy() const
 {
-  double m {getMass()};
-  double p_squared {P_[0] * P_[0] + P_[1] * P_[1] + P_[2] * P_[2]};
+  double m{getMass()};
+  double p_squared{P_[0] * P_[0] + P_[1] * P_[1] + P_[2] * P_[2]};
   return std::sqrt(m * m + p_squared);
 }
 

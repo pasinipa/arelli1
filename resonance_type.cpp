@@ -1,7 +1,7 @@
 #include "resonance_type.hpp"
 
 lab::ResonanceType::ResonanceType(const std::string& name, double mass,
-                                 int charge, double width)
+                                  int charge, double width)
     : ParticleType{name, mass, charge}
     , width_{width} {};
 

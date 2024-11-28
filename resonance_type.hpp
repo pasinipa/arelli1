@@ -13,7 +13,6 @@ class ResonanceType : public ParticleType
 
  private:
   const double width_; // expressed in eV
-
 };
 
 } // namespace lab

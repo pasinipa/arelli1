@@ -1,6 +1,6 @@
 #pragma once
-#include <string>
 #include <iostream>
+#include <string>
 
 namespace lab {
 
@@ -8,7 +8,7 @@ class ParticleType
 {
  public:
   explicit ParticleType(const std::string& name, double mass, int charge);
-  virtual ~ParticleType() {};
+  virtual ~ParticleType(){};
   const std::string& getName() const;
   double getMass() const;
   int getCharge() const;
@@ -17,8 +17,9 @@ class ParticleType
 
  private:
   const std::string name_;
-  const double mass_;  // expressed in GeV/c^2
-  const int charge_;   // expressed as an integer multiple of the fundamental charge e
+  const double mass_; // expressed in GeV/c^2
+  const int
+      charge_; // expressed as an integer multiple of the fundamental charge e
 };
 
 } // namespace lab

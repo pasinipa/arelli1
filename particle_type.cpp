@@ -1,6 +1,7 @@
 #include "particle_type.hpp"
 
-lab::ParticleType::ParticleType(const std::string& name, double mass, int charge)
+lab::ParticleType::ParticleType(const std::string& name, double mass,
+                                int charge)
     : name_{name}
     , mass_{mass}
     , charge_{charge}
