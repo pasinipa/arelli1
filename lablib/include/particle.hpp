@@ -29,6 +29,8 @@ class Particle
   void boost(double bx, double by, double bz);
   void print() const;
 
+  static std::vector<ParticleType> particleTypeTable_;
+  static const int maxNumParticleTypes_;
   static void addParticleType(const std::string&, double, int, double = 0);
   static void printParticleTypes();
 
@@ -43,8 +45,6 @@ class Particle
  private:
   int typeID_; // an integer code representing the kind of particle
   Array3D P_;  // the particle's momentum in cartesian coordinates
-  static std::vector<ParticleType> particleTypeTable_;
-  static const int maxNumParticleTypes_;
 
   static int findParticle(const std::string& name);
 };
