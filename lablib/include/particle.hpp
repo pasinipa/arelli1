@@ -49,4 +49,7 @@ class Particle
   static int findParticle(const std::string& name);
 };
 
+double invariantMass (const Particle& p1, const Particle& p2);
+
+
 } // namespace lab

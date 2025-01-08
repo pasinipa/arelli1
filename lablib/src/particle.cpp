@@ -1,4 +1,5 @@
 #include "particle.hpp"
+#include <TRandom.h>
 #include <cmath>
 #include <cstring>
 #include <random>
@@ -37,6 +38,14 @@ int Particle::decay2Body(Particle& dau1, Particle& dau2) const
   if (getMass() == 0.0) {
     printf("Decayment cannot be preformed if mass is zero\n");
     return 1;
+  }
+
+  if (gRandom->Uniform() < .5) {
+    dau1.setTypeID("Kaone+");
+    dau2.setTypeID("Pione-");
+  } else {
+    dau1.setTypeID("Kaone-");
+    dau2.setTypeID("Pione+");
   }
 
   double massMot  = getMass();
@@ -189,6 +198,14 @@ double Particle::getEnergy() const
   double m{getMass()};
   double p_squared{P_[0] * P_[0] + P_[1] * P_[1] + P_[2] * P_[2]};
   return std::sqrt(m * m + p_squared);
+}
+
+double invariantMass(const Particle& p1, const Particle& p2)
+{
+  return std::sqrt(
+      std::pow(p1.getEnergy() + p2.getEnergy(), 2)
+      - std::pow(euclidianNorm(array3DSum(p1.getImpulse(), p2.getImpulse())),
+                 2));
 }
 
 } // namespace lab
