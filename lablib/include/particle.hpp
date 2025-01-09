@@ -23,7 +23,7 @@ class Particle
  public:
   Particle() = default;
   explicit Particle(const std::string&);
-  explicit Particle(const std::string&, const Array3D&);
+  explicit Particle(const std::string&, Array3D&&);
 
   int decay2Body(Particle& dau1, Particle& dau2) const;
   void boost(double bx, double by, double bz);
@@ -31,6 +31,7 @@ class Particle
 
   static std::vector<ParticleType> particleTypeTable_;
   static const int maxNumParticleTypes_;
+  static int findParticle(const std::string& name);
   static void addParticleType(const std::string&, double, int, double = 0);
   static void printParticleTypes();
 
@@ -45,8 +46,6 @@ class Particle
  private:
   int typeID_; // an integer code representing the kind of particle
   Array3D P_;  // the particle's momentum in cartesian coordinates
-
-  static int findParticle(const std::string& name);
 };
 
 double invariantMass (const Particle& p1, const Particle& p2);

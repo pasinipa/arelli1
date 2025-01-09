@@ -23,7 +23,7 @@ Particle::Particle(const std::string& name)
     : Particle(name, {0., 0., 0.})
 {}
 
-Particle::Particle(const std::string& name, const Array3D& impulse)
+Particle::Particle(const std::string& name, Array3D&& impulse)
     : P_{impulse}
 {
   typeID_ = findParticle(name);
@@ -40,10 +40,10 @@ int Particle::decay2Body(Particle& dau1, Particle& dau2) const
     return 1;
   }
 
-  if (gRandom->Uniform() < .5) {
+  if (gRandom->Uniform(0., 1.) < .5) {
     dau1.setTypeID("K+");
     dau2.setTypeID("Pi-");
-  } else {
+  } else { 
     dau1.setTypeID("K-");
     dau2.setTypeID("Pi+");
   }

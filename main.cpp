@@ -17,7 +17,7 @@ void simulateEvent(std::vector<lab::Particle>& eventParticles,
                    std::vector<TH1*>& histograms);
 void runAnalysis(const std::vector<TH1*>& histograms);
 void fillInvMassHisto(const std::vector<lab::Particle>& eventParticles,
-                      std::vector<TH1*>& histograms);
+                      const std::vector<TH1*>& histograms);
 lab::Array3D sphericalToCartesian(double radius, double theta, double phi);
 void setStyle();
 void setupHistograms(std::vector<TH1*>& histograms);
@@ -46,10 +46,8 @@ int main()
   eventParticles.reserve(SAFE_SIZE);
   for (int i = 0; i < N_EVENTS; ++i){
     simulateEvent(eventParticles, histograms);
-    std::cout << "Event N: " << i << '\n';
   }
 
-  std::cout << "I have simulated shit!\n";
   runAnalysis(histograms); 
   outputFile->Close();
 }
@@ -68,17 +66,17 @@ void simulateEvent(std::vector<lab::Particle>& eventParticles,
 
     percent = gRandom->Uniform(0.,1.);
     if (percent < .40)
-      eventParticles.push_back(lab::Particle("Pi-", sphericalToCartesian(magnitude, theta, phi)));
-    else if (percent < .80)
       eventParticles.push_back(lab::Particle("Pi+", sphericalToCartesian(magnitude, theta, phi)));
+    else if (percent < .80)
+      eventParticles.push_back(lab::Particle("Pi-", sphericalToCartesian(magnitude, theta, phi)));
     else if (percent < .85)
-      eventParticles.push_back(lab::Particle("K-", sphericalToCartesian(magnitude, theta, phi)));
-    else if (percent < .90)
       eventParticles.push_back(lab::Particle("K+", sphericalToCartesian(magnitude, theta, phi)));
+    else if (percent < .90)
+      eventParticles.push_back(lab::Particle("K-", sphericalToCartesian(magnitude, theta, phi)));
     else if (percent < .945)
-      eventParticles.push_back(lab::Particle("P-", sphericalToCartesian(magnitude, theta, phi)));
-    else if (percent < .99)
       eventParticles.push_back(lab::Particle("P+", sphericalToCartesian(magnitude, theta, phi)));
+    else if (percent < .99)
+      eventParticles.push_back(lab::Particle("P-", sphericalToCartesian(magnitude, theta, phi)));
     else {
       particle.setTypeID("K*");
       particle.decay2Body(dau1, dau2);
@@ -116,7 +114,7 @@ void runAnalysis(const std::vector<TH1*>& histograms)
 {
   writeBase(histograms);
 
-  TF1* expImpulseFunction = new TF1("expImpulse", "expo", histograms[1]->GetXaxis()->GetXmin(), histograms[2]->GetXaxis()->GetXmax());
+  TF1* expImpulseFunction = new TF1("expImpulse", "expo", histograms[1]->GetXaxis()->GetXmin(), histograms[1]->GetXaxis()->GetXmax());
   TF1* polarAngleFunction = new TF1("uniformPolar", "[0]", histograms[2]->GetXaxis()->GetXmin(), histograms[2]->GetXaxis()->GetXmax());
   TF1* azimuthalAngleFunction = new TF1("uniformAzimuthal", "[0]", histograms[3]->GetXaxis()->GetXmin(), histograms[3]->GetXaxis()->GetXmax());
   expImpulseFunction->SetLineColor(kRed);
@@ -147,17 +145,19 @@ void runAnalysis(const std::vector<TH1*>& histograms)
   histograms[11]->Fit(gaussFunction0, "R");
   differenceHisto1->Fit(gaussFunction1, "R");
   differenceHisto2->Fit(gaussFunction2, "R");
-  //histograms[11]->GetXaxis()->SetRangeUser(0.2, 1.5); ?????
+  histograms[11]->GetXaxis()->SetRangeUser(0.2, 1.5);
+  differenceHisto1->GetXaxis()->SetRangeUser(0.2, 1.5);
+  differenceHisto2->GetXaxis()->SetRangeUser(0.2, 1.5);
+
   streamInvMassFit0(gaussFunction0);
   streamInvMassFit1(gaussFunction1);
   streamInvMassFit2(gaussFunction2);
   
   writeFit(histograms, differenceHisto1, differenceHisto2);
-  std::cout << "\nI DID EVERYTHING!!!!!\n";
 }
 
 void fillInvMassHisto(const std::vector<lab::Particle>& eventParticles,
-                      std::vector<TH1*>& histograms)
+                      const std::vector<TH1*>& histograms)
 {
   for (auto it = eventParticles.begin(); it != --eventParticles.end(); ++it) {
     const lab::Particle& latest{eventParticles.back()};
@@ -167,13 +167,16 @@ void fillInvMassHisto(const std::vector<lab::Particle>& eventParticles,
         == lab::Particle::particleTypeTable_[(*it).getTypeID()].getCharge()};
     const bool areKPiPair{
         (latest.getTypeID() == 0 and (*it).getTypeID() == 3)
-        or (latest.getTypeID() == 1 and (*it).getTypeID() == 2)};
+        or (latest.getTypeID() == 0 and (*it).getTypeID() == 4)
+        or (latest.getTypeID() == 1 and (*it).getTypeID() == 3)
+        or (latest.getTypeID() == 1 and (*it).getTypeID() == 4)};
 
     histograms[6]->Fill(invmass);
     if (haveSameCharge) {
       histograms[7]->Fill(invmass);
-      if (areKPiPair)
+      if (areKPiPair){
         histograms[9]->Fill(invmass);
+      }
     } else {
       histograms[8]->Fill(invmass);
       if (areKPiPair)
@@ -201,18 +204,18 @@ void setStyle()
 void setupHistograms(std::vector<TH1*>& histograms)
 {
   histograms.reserve(12);
-  histograms.push_back(new TH1I("h0", "TypeID", lab::Particle::particleTypeTable_.size(), 0, 7));
+  histograms.push_back(new TH1I("h0", "TypeID", 7, 0, 7));
   histograms.push_back(new TH1F("h1", "Impulse Magnitude", 200, 0., 6.));
   histograms.push_back(new TH1F("h2", "Polar Angle", 200, 0., M_PI));
   histograms.push_back(new TH1F("h3", "Azimuthal Angle", 200, 0., 2*M_PI));
   histograms.push_back(new TH1F("h4", "Transverse Impulse", 200, 0., 6.));
   histograms.push_back(new TH1F("h5", "Energy", 200, 0., 6.));
   histograms.push_back(new TH1F("h6", "Invariant Mass (all pairs)", 1200, 0., 6.));
-  histograms.push_back(new TH1F("h7", "Invariant Mass (same charge pairs)", 800, 0., 6.));
-  histograms.push_back(new TH1F("h8", "Invariant Mass (opposite charge pairs)" , 800, 0., 6.));
-  histograms.push_back(new TH1F("h9", "Invariant Mass (same charge pairs of K and Pi)", 800, 0., 6.));
-  histograms.push_back(new TH1F("h10", "Invariant Mass (opposite charge pairs of K and Pi)", 800, 0., 6.));
-  histograms.push_back(new TH1F("h11", "Invariant Mass (true decayment particles)", 400, 0.6, 1.2));
+  histograms.push_back(new TH1F("h7", "Invariant Mass (same charge pairs)", 1200, 0., 6.));
+  histograms.push_back(new TH1F("h8", "Invariant Mass (opposite charge pairs)" , 1200, 0., 6.));
+  histograms.push_back(new TH1F("h9", "Invariant Mass (same charge pairs of K and Pi)", 1200, 0., 6.));
+  histograms.push_back(new TH1F("h10", "Invariant Mass (opposite charge pairs of K and Pi)", 1200, 0., 6.));
+  histograms.push_back(new TH1F("h11", "Invariant Mass (true decayment particles)", 300, 0.6, 1.2));
 
   for (TH1* h : histograms) {
     h->GetXaxis()->SetTitleSize(0.05);
@@ -236,15 +239,15 @@ void setupHistograms(std::vector<TH1*>& histograms)
 }
 
 void addParticleTypes(){
-  lab::Particle::addParticleType("Pi+", 0.13957, +1);
+  lab::Particle::addParticleType("Pi+", 0.13957, 1);
   lab::Particle::addParticleType("Pi-", 0.13957, -1);
-  lab::Particle::addParticleType("K+", 0.49367, +1);
+  lab::Particle::addParticleType("K+", 0.49367, 1);
   lab::Particle::addParticleType("K-", 0.49367, -1);
-  lab::Particle::addParticleType("P+", 0.93827, +1);
+  lab::Particle::addParticleType("P+", 0.93827, 1);
   lab::Particle::addParticleType("P-", 0.93827, -1);
   lab::Particle::addParticleType("K*", 0.89166, 0, 0.050);
   for (int i{0}; i < 7; ++i)
-  std::cout << "i = 0\t\t" << lab::Particle::particleTypeTable_[i].getName() << '\n';
+  std::cout << "i = "<< i << "\t\t" << lab::Particle::particleTypeTable_[i].getName() << '\n';
 }
 
 void streamImpulseFit(TF1* fn) {
@@ -279,10 +282,8 @@ void streamAzimuthalFit(TH1* histo, TF1* fn) {
   std::cout << "Uniform Fit: Azimuthal Angle\n"
             << "Fit Height: " << azimuthalFitHeight << '\n'
             << "Expected Height: " << azimuthalExpectedHeight << '\n'
-            << "(Fit - Expected) Height: " << azimuthalFitHeight - azimuthalExpectedHeight
-            << "Reduced Chi Squared: "
-            << fn->GetChisquare() / fn->GetNDF()
-            << '\n'
+            << "(Fit - Expected) Height: " << azimuthalFitHeight - azimuthalExpectedHeight << '\n'
+            << "Reduced Chi Squared: " << fn->GetChisquare() / fn->GetNDF() << '\n'
             << "Fit Probability: " << fn->GetProb() << '\n'
             << '\n';
 }
@@ -323,8 +324,8 @@ void streamInvMassFit2(TF1* fn) {
 void streamTypeIDInfo(TH1* histo) {
   std::cout << "Particle Generation Ratios (TypeID)" << '\n'
             << "Total of Particles Generated: " << histo->GetEntries() << '\n';
-  for (int i{0}; i < 8; ++i) {
-    std::cout << "TypeID: " << i << "\t\t" << "Entries: " << histo->GetBinContent(i) << '\t'
+  for (int i{1}; i < 8; ++i) {
+    std::cout << "TypeID: " << i - 1 << "\t\t" << "Entries: " << histo->GetBinContent(i) << '\t'
               << "(" << histo->GetBinContent(i) / histo->GetEntries() << "%)" << '\n';
   }
   std::cout << '\n';
@@ -373,6 +374,7 @@ void writeFit(const std::vector<TH1*>& histograms, TH1* differenceHisto1, TH1* d
   polarFitHisto->Draw();
   c1Fit->cd(3);
   azimuthalFitHisto->Draw();
+  c1Fit->Update();
   TCanvas* c2Fit = new TCanvas("c2Fit", "Fit Histograms: Invariant Mass", 1000, 1000, 800, 600);
   c2Fit->Divide(1, 3);
   c2Fit->cd(1);
@@ -381,6 +383,8 @@ void writeFit(const std::vector<TH1*>& histograms, TH1* differenceHisto1, TH1* d
   differenceHisto1->Draw();
   c2Fit->cd(3);
   differenceHisto2->Draw();
+  c2Fit->Update();
+
 
   impulseFitHisto->Write();
   polarFitHisto->Write();
