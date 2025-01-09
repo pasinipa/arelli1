@@ -41,11 +41,11 @@ int Particle::decay2Body(Particle& dau1, Particle& dau2) const
   }
 
   if (gRandom->Uniform() < .5) {
-    dau1.setTypeID("Kaone+");
-    dau2.setTypeID("Pione-");
+    dau1.setTypeID("K+");
+    dau2.setTypeID("Pi-");
   } else {
-    dau1.setTypeID("Kaone-");
-    dau2.setTypeID("Pione+");
+    dau1.setTypeID("K-");
+    dau2.setTypeID("Pi+");
   }
 
   double massMot  = getMass();

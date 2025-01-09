@@ -13,20 +13,43 @@ constexpr int N_EVENTS              = 1E5;
 constexpr int N_PARTICLES_PER_EVENT = 100;
 constexpr int SAFE_SIZE             = 120;
 
+void simulateEvent(std::vector<lab::Particle>& eventParticles,
+                   std::vector<TH1*>& histograms);
+void runAnalysis(const std::vector<TH1*>& histograms);
+void fillInvMassHisto(const std::vector<lab::Particle>& eventParticles,
+                      std::vector<TH1*>& histograms);
+lab::Array3D sphericalToCartesian(double radius, double theta, double phi);
+void setStyle();
+void setupHistograms(std::vector<TH1*>& histograms);
+void addParticleTypes();
+void streamImpulseFit(TH1* histo, TF1* fn);
+void streamPolarFit(TH1* histo, TF1* fn);
+void streamAzimuthalFit(TH1* histo, TF1* fn);
+void streamInvMassFit0(TH1* histo, TF1* fn);
+void streamInvMassFit1(TH1* histo, TF1* fn);
+void streamInvMassFit2(TH1* histo, TF1* fn);
+void streamTypeIDInfo(TH1* histo);
+void writeAndPrintBase(const std::vector<TH1*>& histograms);
+void writeAndPrintFit(const std::vector<TH1*>& histograms, TH1* differenceHisto1, TH1* differenceHisto2);
+
+
 int main()
 {
   setStyle();
   gRandom->SetSeed();
   addParticleTypes();
-
   std::vector<TH1*> histograms;
   setupHistograms(histograms);
   TFile* outputFile = new TFile("simulation_data.root", "RECREATE");
 
   std::vector<lab::Particle> eventParticles;
   eventParticles.reserve(SAFE_SIZE);
-  for (int i = 0; i < N_EVENTS; ++i)
+  for (int i = 0; i < N_EVENTS; ++i){
     simulateEvent(eventParticles, histograms);
+    std::cout << "I'VE SIMULATED AN EVENT!!!" << " event N: " << i <<'\n';
+  }
+
+  std::cout << "I've simulated shit!\n";
   runAnalysis(histograms); 
   outputFile->Close();
 }
@@ -35,7 +58,7 @@ void simulateEvent(std::vector<lab::Particle>& eventParticles,
                    std::vector<TH1*>& histograms)
 {
   eventParticles.clear();
-  double theta, phi, magnitude, percent;
+  double theta{}, phi{}, magnitude{}, percent{};
   lab::Particle particle, dau1, dau2;
 
   for (int i = 0; i < N_PARTICLES_PER_EVENT; ++i) {
@@ -43,13 +66,6 @@ void simulateEvent(std::vector<lab::Particle>& eventParticles,
     theta     = gRandom->Uniform(TMath::Pi());
     phi       = gRandom->Uniform(TMath::TwoPi());
     particle.setImpulse(sphericalToCartesian(magnitude, theta, phi));
-    histograms[1]->Fill(magnitude);
-    histograms[2]->Fill(theta);
-    histograms[3]->Fill(phi);
-    histograms[4]->Fill(
-        std::pow(particle.getImpulse()[0], 2)
-        + std::pow(particle.getImpulse()[1], 2)); // transverse impulse
-    histograms[5]->Fill(particle.getEnergy());
 
     percent = gRandom->Uniform();
     if (percent < .40)
@@ -73,18 +89,28 @@ void simulateEvent(std::vector<lab::Particle>& eventParticles,
       fillInvMassHisto(eventParticles, histograms);
       histograms[0]->Fill(dau1.getTypeID());
       histograms[0]->Fill(dau2.getTypeID());
+      histograms[4]->Fill(
+        std::pow(dau1.getImpulse()[0], 2)
+        + std::pow(dau1.getImpulse()[1], 2)); // transverse impulse
+      histograms[4]->Fill(
+        std::pow(dau2.getImpulse()[0], 2)
+        + std::pow(dau2.getImpulse()[1], 2)); // transverse impulse
+      histograms[5]->Fill(dau1.getEnergy());
+      histograms[5]->Fill(dau2.getEnergy());
       histograms[11]->Fill(lab::invariantMass(dau1, dau2));
       continue;
     }
-    eventParticles.push_back(particle);
     histograms[0]->Fill(particle.getTypeID());
+    histograms[1]->Fill(magnitude);
+    histograms[2]->Fill(theta);
+    histograms[3]->Fill(phi);
+    histograms[4]->Fill(
+        std::pow(particle.getImpulse()[0], 2)
+        + std::pow(particle.getImpulse()[1], 2)); // transverse impulse
+    histograms[5]->Fill(particle.getEnergy());
+    eventParticles.push_back(particle);
     fillInvMassHisto(eventParticles, histograms);
   }
-
-  TFile* file = new TFile("simulation_data.root", "RECREATE");
-  for (auto h : histograms)
-    h->Write();
-  file->Close();
 }
 
 void runAnalysis(const std::vector<TH1*>& histograms)
@@ -126,6 +152,7 @@ void runAnalysis(const std::vector<TH1*>& histograms)
   streamInvMassFit2(differenceHisto2, gaussFunction2);
   
   writeAndPrintFit(histograms, differenceHisto1, differenceHisto2);
+  std::cout << "\nI DID EVERYTHING!!!!!\n";
 }
 
 void fillInvMassHisto(const std::vector<lab::Particle>& eventParticles,
