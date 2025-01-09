@@ -22,15 +22,15 @@ lab::Array3D sphericalToCartesian(double radius, double theta, double phi);
 void setStyle();
 void setupHistograms(std::vector<TH1*>& histograms);
 void addParticleTypes();
-void streamImpulseFit(TH1* histo, TF1* fn);
+void streamImpulseFit(TF1* fn);
 void streamPolarFit(TH1* histo, TF1* fn);
 void streamAzimuthalFit(TH1* histo, TF1* fn);
-void streamInvMassFit0(TH1* histo, TF1* fn);
-void streamInvMassFit1(TH1* histo, TF1* fn);
-void streamInvMassFit2(TH1* histo, TF1* fn);
+void streamInvMassFit0(TF1* fn);
+void streamInvMassFit1(TF1* fn);
+void streamInvMassFit2(TF1* fn);
 void streamTypeIDInfo(TH1* histo);
-void writeAndPrintBase(const std::vector<TH1*>& histograms);
-void writeAndPrintFit(const std::vector<TH1*>& histograms, TH1* differenceHisto1, TH1* differenceHisto2);
+void writeBase(const std::vector<TH1*>& histograms);
+void writeFit(const std::vector<TH1*>& histograms, TH1* differenceHisto1, TH1* differenceHisto2);
 
 
 int main()
@@ -46,10 +46,10 @@ int main()
   eventParticles.reserve(SAFE_SIZE);
   for (int i = 0; i < N_EVENTS; ++i){
     simulateEvent(eventParticles, histograms);
-    std::cout << "I'VE SIMULATED AN EVENT!!!" << " event N: " << i <<'\n';
+    std::cout << "Event N: " << i << '\n';
   }
 
-  std::cout << "I've simulated shit!\n";
+  std::cout << "I have simulated shit!\n";
   runAnalysis(histograms); 
   outputFile->Close();
 }
@@ -65,21 +65,20 @@ void simulateEvent(std::vector<lab::Particle>& eventParticles,
     magnitude = gRandom->Exp(1.);
     theta     = gRandom->Uniform(TMath::Pi());
     phi       = gRandom->Uniform(TMath::TwoPi());
-    particle.setImpulse(sphericalToCartesian(magnitude, theta, phi));
 
-    percent = gRandom->Uniform();
+    percent = gRandom->Uniform(0.,1.);
     if (percent < .40)
-      particle.setTypeID("Pi-");
+      eventParticles.push_back(lab::Particle("Pi-", sphericalToCartesian(magnitude, theta, phi)));
     else if (percent < .80)
-      particle.setTypeID("Pi+");
+      eventParticles.push_back(lab::Particle("Pi+", sphericalToCartesian(magnitude, theta, phi)));
     else if (percent < .85)
-      particle.setTypeID("K-");
+      eventParticles.push_back(lab::Particle("K-", sphericalToCartesian(magnitude, theta, phi)));
     else if (percent < .90)
-      particle.setTypeID("K+");
+      eventParticles.push_back(lab::Particle("K+", sphericalToCartesian(magnitude, theta, phi)));
     else if (percent < .945)
-      particle.setTypeID("P+");
+      eventParticles.push_back(lab::Particle("P-", sphericalToCartesian(magnitude, theta, phi)));
     else if (percent < .99)
-      particle.setTypeID("P-");
+      eventParticles.push_back(lab::Particle("P+", sphericalToCartesian(magnitude, theta, phi)));
     else {
       particle.setTypeID("K*");
       particle.decay2Body(dau1, dau2);
@@ -87,6 +86,7 @@ void simulateEvent(std::vector<lab::Particle>& eventParticles,
       fillInvMassHisto(eventParticles, histograms);
       eventParticles.push_back(dau2);
       fillInvMassHisto(eventParticles, histograms);
+      histograms[0]->Fill(particle.getTypeID());
       histograms[0]->Fill(dau1.getTypeID());
       histograms[0]->Fill(dau2.getTypeID());
       histograms[4]->Fill(
@@ -100,22 +100,21 @@ void simulateEvent(std::vector<lab::Particle>& eventParticles,
       histograms[11]->Fill(lab::invariantMass(dau1, dau2));
       continue;
     }
-    histograms[0]->Fill(particle.getTypeID());
+    histograms[0]->Fill(eventParticles.back().getTypeID());
     histograms[1]->Fill(magnitude);
     histograms[2]->Fill(theta);
     histograms[3]->Fill(phi);
     histograms[4]->Fill(
-        std::pow(particle.getImpulse()[0], 2)
-        + std::pow(particle.getImpulse()[1], 2)); // transverse impulse
-    histograms[5]->Fill(particle.getEnergy());
-    eventParticles.push_back(particle);
+        std::pow(eventParticles.back().getImpulse()[0], 2)
+        + std::pow(eventParticles.back().getImpulse()[1], 2)); // transverse impulse
+    histograms[5]->Fill(eventParticles.back().getEnergy());
     fillInvMassHisto(eventParticles, histograms);
   }
 }
 
 void runAnalysis(const std::vector<TH1*>& histograms)
 {
-  writeAndPrintBase(histograms);
+  writeBase(histograms);
 
   TF1* expImpulseFunction = new TF1("expImpulse", "expo", histograms[1]->GetXaxis()->GetXmin(), histograms[2]->GetXaxis()->GetXmax());
   TF1* polarAngleFunction = new TF1("uniformPolar", "[0]", histograms[2]->GetXaxis()->GetXmin(), histograms[2]->GetXaxis()->GetXmax());
@@ -123,11 +122,11 @@ void runAnalysis(const std::vector<TH1*>& histograms)
   expImpulseFunction->SetLineColor(kRed);
   polarAngleFunction->SetLineColor(kRed);
   azimuthalAngleFunction->SetLineColor(kRed);
-  histograms[1]->Fit("expImpulse", "R");
-  histograms[2]->Fit("uniformPolar", "R");
-  histograms[3]->Fit("uniformAzimuthal", "R");
+  histograms[1]->Fit(expImpulseFunction, "R");
+  histograms[2]->Fit(polarAngleFunction, "R");
+  histograms[3]->Fit(azimuthalAngleFunction, "R");
   streamTypeIDInfo(histograms[0]);
-  streamImpulseFit(histograms[1], expImpulseFunction);
+  streamImpulseFit(expImpulseFunction);
   streamPolarFit(histograms[2], polarAngleFunction);
   streamAzimuthalFit(histograms[3], azimuthalAngleFunction);
 
@@ -137,21 +136,23 @@ void runAnalysis(const std::vector<TH1*>& histograms)
   differenceHisto2->SetName("hS2Fit");
   differenceHisto1->SetTitle("Fit: (Opposite Charge - Same Charge) Invariant Mass");
   differenceHisto2->SetTitle("Fit: (Opposite Charge - Same Charge) Invariant Mass of K, Pi Particles");
+  differenceHisto1->SetAxisRange(0.2, 1.6);
+  differenceHisto2->SetAxisRange(0.2, 1.6);
   TF1* gaussFunction0 = new TF1("gauss0", "gaus", histograms[11]->GetXaxis()->GetXmin(), histograms[11]->GetXaxis()->GetXmax());
   TF1* gaussFunction1 = new TF1("gauss1", "gaus", differenceHisto1->GetXaxis()->GetXmin(), differenceHisto1->GetXaxis()->GetXmax());
   TF1* gaussFunction2 = new TF1("gauss2", "gaus", differenceHisto2->GetXaxis()->GetXmin(), differenceHisto2->GetXaxis()->GetXmax());
   gaussFunction0->SetLineColor(kRed);
   gaussFunction1->SetLineColor(kRed);
   gaussFunction2->SetLineColor(kRed);
-  histograms[11]->Fit("gauss0", "R");
-  differenceHisto1->Fit("gauss1", "R");
-  differenceHisto2->Fit("gauss1", "R");
+  histograms[11]->Fit(gaussFunction0, "R");
+  differenceHisto1->Fit(gaussFunction1, "R");
+  differenceHisto2->Fit(gaussFunction2, "R");
   //histograms[11]->GetXaxis()->SetRangeUser(0.2, 1.5); ?????
-  streamInvMassFit0(histograms[11], gaussFunction0);
-  streamInvMassFit1(differenceHisto1, gaussFunction1);
-  streamInvMassFit2(differenceHisto2, gaussFunction2);
+  streamInvMassFit0(gaussFunction0);
+  streamInvMassFit1(gaussFunction1);
+  streamInvMassFit2(gaussFunction2);
   
-  writeAndPrintFit(histograms, differenceHisto1, differenceHisto2);
+  writeFit(histograms, differenceHisto1, differenceHisto2);
   std::cout << "\nI DID EVERYTHING!!!!!\n";
 }
 
@@ -200,18 +201,18 @@ void setStyle()
 void setupHistograms(std::vector<TH1*>& histograms)
 {
   histograms.reserve(12);
-  histograms.push_back(new TH1I("h0", "TypeID", lab::Particle::particleTypeTable_.size(), -0.5, 7.5));
-  histograms.push_back(new TH1F("h1", "Impulse Magnitude", 200, 0., 6.7));
+  histograms.push_back(new TH1I("h0", "TypeID", lab::Particle::particleTypeTable_.size(), 0, 7));
+  histograms.push_back(new TH1F("h1", "Impulse Magnitude", 200, 0., 6.));
   histograms.push_back(new TH1F("h2", "Polar Angle", 200, 0., M_PI));
-  histograms.push_back(new TH1F("h3", "Azimuthal Angle", 200, 0., M_2_PI));
-  histograms.push_back(new TH1F("h4", "Transverse Impulse", 200, 0., 6.7));
-  histograms.push_back(new TH1F("h5", "Energy", 200, 0., 6.7));
-  histograms.push_back(new TH1F("h6", "Invariant Mass (all pairs)", 1200, 0., 6.7));
-  histograms.push_back(new TH1F("h7", "Invariant Mass (same charge pairs)", 1200, 0., 6.7));
-  histograms.push_back(new TH1F("h8", "Invariant Mass (opposite charge pairs)", 1200, 0., 6.7));
-  histograms.push_back(new TH1F("h9", "Invariant Mass (same charge pairs of K and Pi)", 1200, 0., 6.7));
-  histograms.push_back(new TH1F("h10", "Invariant Mass (opposite charge pairs of K and Pi)", 1200, 0., 6.7));
-  histograms.push_back(new TH1F("h11", "Invariant Mass (true decayment particles)", 300, 0., 1.8));
+  histograms.push_back(new TH1F("h3", "Azimuthal Angle", 200, 0., 2*M_PI));
+  histograms.push_back(new TH1F("h4", "Transverse Impulse", 200, 0., 6.));
+  histograms.push_back(new TH1F("h5", "Energy", 200, 0., 6.));
+  histograms.push_back(new TH1F("h6", "Invariant Mass (all pairs)", 1200, 0., 6.));
+  histograms.push_back(new TH1F("h7", "Invariant Mass (same charge pairs)", 800, 0., 6.));
+  histograms.push_back(new TH1F("h8", "Invariant Mass (opposite charge pairs)" , 800, 0., 6.));
+  histograms.push_back(new TH1F("h9", "Invariant Mass (same charge pairs of K and Pi)", 800, 0., 6.));
+  histograms.push_back(new TH1F("h10", "Invariant Mass (opposite charge pairs of K and Pi)", 800, 0., 6.));
+  histograms.push_back(new TH1F("h11", "Invariant Mass (true decayment particles)", 400, 0.6, 1.2));
 
   for (TH1* h : histograms) {
     h->GetXaxis()->SetTitleSize(0.05);
@@ -230,6 +231,8 @@ void setupHistograms(std::vector<TH1*>& histograms)
     histograms[i]->GetXaxis()->SetTitle(histograms[i]->GetTitle());
   for (int i{6}; i < 12; ++i)
     histograms[i]->GetXaxis()->SetTitle("Invariant Mass");
+  for (int i{7}; i < 11; ++i)
+    histograms[i]->Sumw2();
 }
 
 void addParticleTypes(){
@@ -240,22 +243,21 @@ void addParticleTypes(){
   lab::Particle::addParticleType("P+", 0.93827, +1);
   lab::Particle::addParticleType("P-", 0.93827, -1);
   lab::Particle::addParticleType("K*", 0.89166, 0, 0.050);
+  for (int i{0}; i < 7; ++i)
+  std::cout << "i = 0\t\t" << lab::Particle::particleTypeTable_[i].getName() << '\n';
 }
 
-void streamImpulseFit(TH1* histo, TF1* fn) {
-  const double impulseMean { histo->GetMean() };
-  const double impulseMeanError { histo->GetMeanError() };
+void streamImpulseFit(TF1* fn) {
   std::cout << "Exponential Fit: Impulse Magnitude" << '\n';
-  if (std::abs(impulseMean - 1.) < impulseMeanError)
-    std::cout << "Sample mean IS compatible with the true mean of 1GeV" << '\n';
+  if (std::abs((-fn->GetParameter(1)) - 1.) < fn->GetParError(1))
+    std::cout << "Fit mean IS compatible with the true mean of 1GeV" << '\n';
   else 
-    std::cout << "Sample mean IS NOT compatible with the true mean of 1GeV" << '\n';
-  std::cout << "Sample Mean: "                << impulseMean << '\n'
-            << "Sample Mean Error: "          << impulseMeanError << '\n'
-            << "Fit Amplitude Coefficient: "  << fn->GetParameter(0) << '\n'
-            << "Fit Decay Coefficient: "      << fn->GetParameter(1) << '\n'
-            << "Reduced Chi Squared: "        << fn->GetChisquare() / fn->GetNDF() << '\n'
-            << "Fit Probability: "            << fn->GetProb() << '\n'
+    std::cout << "Fit mean IS NOT compatible with the true mean of 1GeV" << '\n';
+  std::cout << "Fit Mean (Decay Coefficient): " << -fn->GetParameter(1) << '\n'
+            << "Decay Coefficient Error: "      << fn->GetParError(1) << '\n'
+            << "Fit Amplitude Coefficient: "    << fn->GetParameter(0) << '\n'     
+            << "Reduced Chi Squared: "          << fn->GetChisquare() / fn->GetNDF() << '\n'
+            << "Fit Probability: "              << fn->GetProb() << '\n'
             << '\n';
 }
 
@@ -263,13 +265,11 @@ void streamPolarFit(TH1* histo, TF1* fn) {
   const double polarExpectedHeight {histo->GetEntries() / histo->GetNbinsX()}; 
   const double polarFitHeight{fn->GetParameter(0)};
   std::cout << "Uniform Fit: Polar Angle\n"
-            << "Fit Height: " << polarFitHeight << '\n'
-            << "Expected Height: " << polarExpectedHeight << '\n'
-            << "(Fit - Expected) Height: " << polarFitHeight - polarExpectedHeight
-            << "Reduced Chi Squared: "
-            << fn->GetChisquare() / fn->GetNDF()
-            << '\n'
-            << "Fit Probability: " << fn->GetProb() << '\n'
+            << "Fit Height: "               << polarFitHeight << '\n'
+            << "Expected Height: "          << polarExpectedHeight << '\n'
+            << "(Fit - Expected) Height: "  << polarFitHeight - polarExpectedHeight << '\n'
+            << "Reduced Chi Squared: "      << fn->GetChisquare() / fn->GetNDF() << '\n'
+            << "Fit Probability: "          << fn->GetProb() << '\n'
             << '\n';
 }
 
@@ -287,7 +287,7 @@ void streamAzimuthalFit(TH1* histo, TF1* fn) {
             << '\n';
 }
 
-void streamInvMassFit0(TH1* histo, TF1* fn) {
+void streamInvMassFit0(TF1* fn) {
   //no sample mean?
   std::cout << "Gauss Fit: True Decayment Particles' Invariant Mass" << '\n'
             << "Fit Amplitude Coefficient: "  << fn->GetParameter(0) << "+/-" << fn->GetParError(0) << '\n'
@@ -298,7 +298,7 @@ void streamInvMassFit0(TH1* histo, TF1* fn) {
             << '\n';
 }
 
-void streamInvMassFit1(TH1* histo, TF1* fn) {
+void streamInvMassFit1(TF1* fn) {
   //no sample mean?
   std::cout << "Gauss Fit: Histogram Difference of Invariant Mass Between Same Charge and Opposite Charge Pairs of Particles" << '\n'
             << "Fit Amplitude Coefficient: "  << fn->GetParameter(0) << "+/-" << fn->GetParError(0) << '\n'
@@ -309,7 +309,7 @@ void streamInvMassFit1(TH1* histo, TF1* fn) {
             << '\n';
 }
 
-void streamInvMassFit2(TH1* histo, TF1* fn) {
+void streamInvMassFit2(TF1* fn) {
   //no sample mean?
   std::cout << "Gauss Fit: Histogram Difference of Invariant Mass Between Same Charge and Opposite Charge (K, Pi) Pairs of Particles" << '\n'
             << "Fit Amplitude Coefficient: "  << fn->GetParameter(0) << "+/-" << fn->GetParError(0) << '\n'
@@ -324,13 +324,13 @@ void streamTypeIDInfo(TH1* histo) {
   std::cout << "Particle Generation Ratios (TypeID)" << '\n'
             << "Total of Particles Generated: " << histo->GetEntries() << '\n';
   for (int i{0}; i < 8; ++i) {
-    std::cout << "TypeID: " << i << "\t\t" << "Entries: " << histo->GetBinContent(i) << '\n'
-              << "(" << histo->GetBinContent(i) / histo->GetEntries() << "%)";
+    std::cout << "TypeID: " << i << "\t\t" << "Entries: " << histo->GetBinContent(i) << '\t'
+              << "(" << histo->GetBinContent(i) / histo->GetEntries() << "%)" << '\n';
   }
   std::cout << '\n';
 }
 
-void writeAndPrintBase(const std::vector<TH1*>& histograms) {
+void writeBase(const std::vector<TH1*>& histograms) {
   TCanvas* c1 = new TCanvas("c1", "Particle Information: Types, Angles, Impulses and Energy", 0, 10, 800, 600);
     c1->Divide(2,3);
   for (int i{0}; i < 6; ++i) {
@@ -349,11 +349,9 @@ void writeAndPrintBase(const std::vector<TH1*>& histograms) {
     h->Write();
   c1->Write();
   c2->Write();
-  c1->Print("TypesAnglesImpulsesEnergy.pdf", "RECREATE");
-  c2->Print("InvariantMass.pdf", "RECREATE");
 }
 
-void writeAndPrintFit(const std::vector<TH1*>& histograms, TH1* differenceHisto1, TH1* differenceHisto2) {
+void writeFit(const std::vector<TH1*>& histograms, TH1* differenceHisto1, TH1* differenceHisto2) {
   TH1F* impulseFitHisto = new TH1F(*(TH1F*)histograms[1]);
   impulseFitHisto->SetName("h1Fit");
   impulseFitHisto->SetTitle("Fit: Impulse Magnitude");
@@ -383,8 +381,6 @@ void writeAndPrintFit(const std::vector<TH1*>& histograms, TH1* differenceHisto1
   differenceHisto1->Draw();
   c2Fit->cd(3);
   differenceHisto2->Draw();
-  c1Fit->Print("AnglesImpulse_FIT.pdf", "RECREATE");
-  c2Fit->Print("InvariantMass_FIT.pdf", "RECREATE");
 
   impulseFitHisto->Write();
   polarFitHisto->Write();
