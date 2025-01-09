@@ -30,7 +30,7 @@ void streamInvMassFit1(TF1* fn);
 void streamInvMassFit2(TF1* fn);
 void streamTypeIDInfo(TH1* histo);
 void writeBase(const std::vector<TH1*>& histograms);
-void writeFit(const std::vector<TH1*>& histograms, TH1* differenceHisto1, TH1* differenceHisto2);
+void writeFit(TH1* impulseFitHisto, TH1* polarFitHisto, TH1* azimuthalFitHisto, TH1* trueDecayFitHisto, TH1* differenceHisto1, TH1* differenceHisto2);
 
 
 int main()
@@ -114,26 +114,39 @@ void runAnalysis(const std::vector<TH1*>& histograms)
 {
   writeBase(histograms);
 
+  TH1F* impulseFitHisto = new TH1F(*(TH1F*)histograms[1]);
+  TH1F* polarFitHisto = new TH1F(*(TH1F*)histograms[2]);
+  TH1F* azimuthalFitHisto = new TH1F(*(TH1F*)histograms[3]);
+  impulseFitHisto->SetName("h1Fit");
+  polarFitHisto->SetName("h2Fit");
+  azimuthalFitHisto->SetName("h3Fit");
+  impulseFitHisto->SetTitle("Fit: Impulse Magnitude");
+  polarFitHisto->SetTitle("Fit: Polar Angle");
+  azimuthalFitHisto->SetTitle("Fit: Azimuthal Angle");
   TF1* expImpulseFunction = new TF1("expImpulse", "expo", histograms[1]->GetXaxis()->GetXmin(), histograms[1]->GetXaxis()->GetXmax());
   TF1* polarAngleFunction = new TF1("uniformPolar", "[0]", histograms[2]->GetXaxis()->GetXmin(), histograms[2]->GetXaxis()->GetXmax());
   TF1* azimuthalAngleFunction = new TF1("uniformAzimuthal", "[0]", histograms[3]->GetXaxis()->GetXmin(), histograms[3]->GetXaxis()->GetXmax());
   expImpulseFunction->SetLineColor(kRed);
   polarAngleFunction->SetLineColor(kRed);
   azimuthalAngleFunction->SetLineColor(kRed);
-  histograms[1]->Fit(expImpulseFunction, "R");
-  histograms[2]->Fit(polarAngleFunction, "R");
-  histograms[3]->Fit(azimuthalAngleFunction, "R");
+  impulseFitHisto->Fit(expImpulseFunction, "R");
+  polarFitHisto->Fit(polarAngleFunction, "R");
+  azimuthalFitHisto->Fit(azimuthalAngleFunction, "R");
   streamTypeIDInfo(histograms[0]);
   streamImpulseFit(expImpulseFunction);
   streamPolarFit(histograms[2], polarAngleFunction);
   streamAzimuthalFit(histograms[3], azimuthalAngleFunction);
 
+  TH1F* trueDecayFitHisto = new TH1F (*((TH1F*)histograms[11])); 
   TH1F* differenceHisto1 = new TH1F(*((TH1F*)histograms[8]) - *((TH1F*)histograms[7]));
   TH1F* differenceHisto2 = new TH1F(*((TH1F*)histograms[10]) - *((TH1F*)histograms[9]));
+  trueDecayFitHisto->SetName("h11Fit");
   differenceHisto1->SetName("hS1Fit");
   differenceHisto2->SetName("hS2Fit");
+  trueDecayFitHisto->SetTitle("Fit: Invariant Mass of True Decayment Particles)");
   differenceHisto1->SetTitle("Fit: (Opposite Charge - Same Charge) Invariant Mass");
   differenceHisto2->SetTitle("Fit: (Opposite Charge - Same Charge) Invariant Mass of K, Pi Particles");
+  trueDecayFitHisto->SetAxisRange(0.2, 1.6);
   differenceHisto1->SetAxisRange(0.2, 1.6);
   differenceHisto2->SetAxisRange(0.2, 1.6);
   TF1* gaussFunction0 = new TF1("gauss0", "gaus", histograms[11]->GetXaxis()->GetXmin(), histograms[11]->GetXaxis()->GetXmax());
@@ -142,18 +155,17 @@ void runAnalysis(const std::vector<TH1*>& histograms)
   gaussFunction0->SetLineColor(kRed);
   gaussFunction1->SetLineColor(kRed);
   gaussFunction2->SetLineColor(kRed);
-  histograms[11]->Fit(gaussFunction0, "R");
+  trueDecayFitHisto->Fit(gaussFunction0, "R");
   differenceHisto1->Fit(gaussFunction1, "R");
   differenceHisto2->Fit(gaussFunction2, "R");
-  histograms[11]->GetXaxis()->SetRangeUser(0.2, 1.5);
+  trueDecayFitHisto->GetXaxis()->SetRangeUser(0.2, 1.5);
   differenceHisto1->GetXaxis()->SetRangeUser(0.2, 1.5);
   differenceHisto2->GetXaxis()->SetRangeUser(0.2, 1.5);
-
   streamInvMassFit0(gaussFunction0);
   streamInvMassFit1(gaussFunction1);
   streamInvMassFit2(gaussFunction2);
   
-  writeFit(histograms, differenceHisto1, differenceHisto2);
+  writeFit(impulseFitHisto, polarFitHisto, azimuthalFitHisto, trueDecayFitHisto, differenceHisto1, differenceHisto2);
 }
 
 void fillInvMassHisto(const std::vector<lab::Particle>& eventParticles,
@@ -246,8 +258,6 @@ void addParticleTypes(){
   lab::Particle::addParticleType("P+", 0.93827, 1);
   lab::Particle::addParticleType("P-", 0.93827, -1);
   lab::Particle::addParticleType("K*", 0.89166, 0, 0.050);
-  for (int i{0}; i < 7; ++i)
-  std::cout << "i = "<< i << "\t\t" << lab::Particle::particleTypeTable_[i].getName() << '\n';
 }
 
 void streamImpulseFit(TF1* fn) {
@@ -336,15 +346,13 @@ void writeBase(const std::vector<TH1*>& histograms) {
     c1->Divide(2,3);
   for (int i{0}; i < 6; ++i) {
     c1->cd(i+1);
-    histograms[i]->Draw("E");
-    histograms[i]->Draw("HISTO,SAME");
+    histograms[i]->Draw();
   }
   TCanvas* c2 = new TCanvas("c2", "Particle Information: All Invariant Mass Combinations", 1000, 1000, 800, 600);
   c2->Divide(2,3);
   for (int i{0}; i < 6; ++i) {
     c2->cd(i+1);
-    histograms[i+6]->Draw("E");
-    histograms[i+6]->Draw("HISTO,SAME");
+    histograms[i+6]->Draw();
   }
   for (auto h : histograms)
     h->Write();
@@ -352,19 +360,7 @@ void writeBase(const std::vector<TH1*>& histograms) {
   c2->Write();
 }
 
-void writeFit(const std::vector<TH1*>& histograms, TH1* differenceHisto1, TH1* differenceHisto2) {
-  TH1F* impulseFitHisto = new TH1F(*(TH1F*)histograms[1]);
-  impulseFitHisto->SetName("h1Fit");
-  impulseFitHisto->SetTitle("Fit: Impulse Magnitude");
-  TH1F* polarFitHisto = new TH1F(*(TH1F*)histograms[2]);
-  polarFitHisto->SetName("h2Fit");
-  polarFitHisto->SetTitle("Fit: Polar Angle");
-  TH1F* azimuthalFitHisto = new TH1F(*(TH1F*)histograms[3]);
-  azimuthalFitHisto->SetName("h3Fit");
-  azimuthalFitHisto->SetTitle("Fit: Azimuthal Angle");
-  TH1F* trueDecayFitHisto = new TH1F(*(TH1F*)histograms[11]);
-  trueDecayFitHisto->SetName("h11Fit");
-  trueDecayFitHisto->SetTitle("Fit: Invariant Mass of True Decayment Particles");
+void writeFit(TH1* impulseFitHisto, TH1* polarFitHisto, TH1* azimuthalFitHisto, TH1* trueDecayFitHisto, TH1* differenceHisto1, TH1* differenceHisto2) {
 
   TCanvas* c1Fit = new TCanvas("c1Fit", "Fit Histograms: Angles and Impulse Magnitude ", 0, 10, 800, 600);
   c1Fit->Divide(1, 3);
