@@ -35,10 +35,6 @@ Particle::Particle(const std::string& name, Array3D&& impulse)
 
 int Particle::decay2Body(Particle& dau1, Particle& dau2) const
 {
-  if (getMass() == 0.0) {
-    printf("Decayment cannot be preformed if mass is zero\n");
-    return 1;
-  }
 
   if (gRandom->Uniform(0., 1.) < .5) {
     dau1.setTypeID("K+");
@@ -46,6 +42,11 @@ int Particle::decay2Body(Particle& dau1, Particle& dau2) const
   } else { 
     dau1.setTypeID("K-");
     dau2.setTypeID("Pi+");
+  }
+
+  if (getMass() == 0.0) {
+    printf("Decayment cannot be preformed if mass is zero\n");
+    return 1;
   }
 
   double massMot  = getMass();
@@ -115,9 +116,9 @@ void Particle::boost(double bx, double by, double bz)
   double bp     = bx * P_[0] + by * P_[1] + bz * P_[2];
   double gamma2 = b2 > 0 ? (gamma - 1.0) / b2 : 0.0;
 
-  P_[0] += gamma2 * bp * bx + gamma * bx * getEnergy();
-  P_[1] += gamma2 * bp * by + gamma * by * getEnergy();
-  P_[2] += gamma2 * bp * bz + gamma * bz * getEnergy();
+  P_[0] += gamma2 * bp * bx + gamma * bx * energy;
+  P_[1] += gamma2 * bp * by + gamma * by * energy;
+  P_[2] += gamma2 * bp * bz + gamma * bz * energy;
 }
 
 void Particle::print() const

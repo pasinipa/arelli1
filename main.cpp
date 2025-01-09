@@ -61,8 +61,8 @@ void simulateEvent(std::vector<lab::Particle>& eventParticles,
 
   for (int i = 0; i < N_PARTICLES_PER_EVENT; ++i) {
     magnitude = gRandom->Exp(1.);
-    theta     = gRandom->Uniform(TMath::Pi());
-    phi       = gRandom->Uniform(TMath::TwoPi());
+    theta     = gRandom->Uniform(0, M_PI);
+    phi       = gRandom->Uniform(0, 2*M_PI);
 
     percent = gRandom->Uniform(0.,1.);
     if (percent < .40)
