@@ -59,10 +59,9 @@ int Particle::decay2Body(Particle& dau1, Particle& dau2) const
 
     float x1, x2, w, y1;
 
-    double invnum = 1. / RAND_MAX;
     do {
-      x1 = 2.0 * rand() * invnum - 1.0;
-      x2 = 2.0 * rand() * invnum - 1.0;
+      x1 = gRandom->Uniform(0., 1.);
+      x2 = gRandom->Uniform(0., 1.);
       w  = x1 * x1 + x2 * x2;
     } while (w >= 1.0);
 
@@ -84,10 +83,8 @@ int Particle::decay2Body(Particle& dau1, Particle& dau2) const
           * (massMot * massMot - (massDau1 - massDau2) * (massDau1 - massDau2)))
       / massMot * 0.5;
 
-  double norm = 2 * M_PI / RAND_MAX;
-
-  double phi   = rand() * norm;
-  double theta = rand() * norm * 0.5 - M_PI / 2.;
+  double phi   = gRandom->Uniform(0., 2*M_PI);
+  double theta = gRandom->Uniform(0., M_PI);
   dau1.setImpulse({p * std::sin(theta) * std::cos(phi),
                    p * std::sin(theta) * std::sin(phi), p * std::cos(theta)});
   dau2.setImpulse({-p * std::sin(theta) * std::cos(phi),

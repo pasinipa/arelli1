@@ -8,6 +8,7 @@
 #include <TRandom.h>
 #include <TStyle.h>
 #include <cmath>
+#include <random>
 
 constexpr int N_EVENTS              = 1E5;
 constexpr int N_PARTICLES_PER_EVENT = 100;
@@ -40,7 +41,7 @@ int main()
   for (int i = 0; i < N_EVENTS; ++i) {
     magnitude = gRandom->Exp(1.);
     theta     = gRandom->Uniform(0, M_PI);
-    phi       = gRandom->Uniform(0, 2*M_PI);
+    phi       = gRandom->Uniform(0, 2 * M_PI);
     particle.setTypeID("K*");
     particle.setImpulse(sphericalToCartesian(magnitude, theta, phi));
     particle.decay2Body(dau1, dau2);
