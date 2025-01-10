@@ -85,7 +85,7 @@ void simulateEvent(std::vector<lab::Particle>& eventParticles,
       fillInvMassHisto(eventParticles, histograms);
       eventParticles.push_back(dau2);
       fillInvMassHisto(eventParticles, histograms);
-      histograms[0]->Fill(7);
+      histograms[0]->Fill(particle.getTypeID());
       histograms[0]->Fill(dau1.getTypeID());
       histograms[0]->Fill(dau2.getTypeID());
       histograms[4]->Fill(
