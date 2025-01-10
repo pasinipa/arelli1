@@ -153,14 +153,6 @@ void runAnalysis(const std::vector<TH1*>& histograms)
   gaussFunction0->SetLineColor(kRed);
   gaussFunction1->SetLineColor(kRed);
   gaussFunction2->SetLineColor(kRed);
-  /*
-  gaussFunction0->SetParameter(1, 0.89166);
-  gaussFunction0->SetParameter(2, 0.05);
-  gaussFunction1->SetParameter(1, 0.89166);
-  gaussFunction1->SetParameter(2, 0.05);
-  gaussFunction2->SetParameter(1, 0.89166);
-  gaussFunction2->SetParameter(2, 0.05);
-  */
   trueDecayFitHisto->Fit(gaussFunction0, "R");
   differenceHisto1->Fit(gaussFunction1, "R");
   differenceHisto2->Fit(gaussFunction2, "R");
