@@ -60,15 +60,15 @@ int Particle::decay2Body(Particle& dau1, Particle& dau2) const
     float x1, x2, w, y1;
 
     do {
-      x1 = gRandom->Uniform(0., 1.);
-      x2 = gRandom->Uniform(0., 1.);
+      x1 = 2.0 * rand() / RAND_MAX - 1.0;
+      x2 = 2.0 * rand() / RAND_MAX - 1.0;
       w  = x1 * x1 + x2 * x2;
     } while (w >= 1.0);
 
     w  = sqrt((-2.0 * log(w)) / w);
     y1 = x1 * w;
 
-    massMot += particleTypeTable_[typeID_].getWidth() * y1;
+    massMot += 0.05 * y1;
   }
 
   if (massMot < massDau1 + massDau2) {
@@ -83,8 +83,10 @@ int Particle::decay2Body(Particle& dau1, Particle& dau2) const
           * (massMot * massMot - (massDau1 - massDau2) * (massDau1 - massDau2)))
       / massMot * 0.5;
 
-  double phi   = gRandom->Uniform(0., 2*M_PI);
-  double theta = gRandom->Uniform(0., M_PI);
+  double norm = 2 * M_PI / RAND_MAX;
+
+  double phi = rand() * norm;
+  double theta = rand() * norm * 0.5 - M_PI / 2.;
   dau1.setImpulse({p * std::sin(theta) * std::cos(phi),
                    p * std::sin(theta) * std::sin(phi), p * std::cos(theta)});
   dau2.setImpulse({-p * std::sin(theta) * std::cos(phi),
@@ -200,10 +202,8 @@ double Particle::getEnergy() const
 
 double invariantMass(const Particle& p1, const Particle& p2)
 {
-  return std::sqrt(
-      std::pow(p1.getEnergy() + p2.getEnergy(), 2)
-      - std::pow(euclidianNorm(array3DSum(p1.getImpulse(), p2.getImpulse())),
-                 2));
+  return std::sqrt(std::pow(p1.getEnergy() + p2.getEnergy(), 2)
+                 - std::pow(euclidianNorm(array3DSum(p1.getImpulse(), p2.getImpulse())), 2));
 }
 
 } // namespace lab

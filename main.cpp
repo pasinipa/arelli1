@@ -22,7 +22,7 @@ lab::Array3D sphericalToCartesian(double radius, double theta, double phi);
 void setStyle();
 void setupHistograms(std::vector<TH1*>& histograms);
 void addParticleTypes();
-void streamImpulseFit(TH1F* histo, TF1* fn);
+void streamImpulseFit(TH1* histo, TF1* fn);
 void streamPolarFit(TH1* histo, TF1* fn);
 void streamAzimuthalFit(TH1* histo, TF1* fn);
 void streamInvMassFit0(TF1* fn);
@@ -147,21 +147,20 @@ void runAnalysis(const std::vector<TH1*>& histograms)
   trueDecayFitHisto->SetTitle("Fit: Invariant Mass of True Decayment Particles)");
   differenceHisto1->SetTitle("Fit: (Opposite Charge - Same Charge) Invariant Mass");
   differenceHisto2->SetTitle("Fit: (Opposite Charge - Same Charge) Invariant Mass of K, Pi Particles");
-  trueDecayFitHisto->SetAxisRange(0.8, 1.);
-  differenceHisto1->SetAxisRange(0.8, 1.);
-  differenceHisto2->SetAxisRange(0.8, 1.);
   TF1* gaussFunction0 = new TF1("gauss0", "gaus", histograms[11]->GetXaxis()->GetXmin(), histograms[11]->GetXaxis()->GetXmax());
   TF1* gaussFunction1 = new TF1("gauss1", "gaus", differenceHisto1->GetXaxis()->GetXmin(), differenceHisto1->GetXaxis()->GetXmax());
   TF1* gaussFunction2 = new TF1("gauss2", "gaus", differenceHisto2->GetXaxis()->GetXmin(), differenceHisto2->GetXaxis()->GetXmax());
   gaussFunction0->SetLineColor(kRed);
   gaussFunction1->SetLineColor(kRed);
   gaussFunction2->SetLineColor(kRed);
+  /*
   gaussFunction0->SetParameter(1, 0.89166);
   gaussFunction0->SetParameter(2, 0.05);
   gaussFunction1->SetParameter(1, 0.89166);
   gaussFunction1->SetParameter(2, 0.05);
   gaussFunction2->SetParameter(1, 0.89166);
   gaussFunction2->SetParameter(2, 0.05);
+  */
   trueDecayFitHisto->Fit(gaussFunction0, "R");
   differenceHisto1->Fit(gaussFunction1, "R");
   differenceHisto2->Fit(gaussFunction2, "R");
