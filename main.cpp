@@ -178,7 +178,7 @@ void runAnalysis(const std::vector<TH1*>& histograms)
 void fillInvMassHisto(const std::vector<lab::Particle>& eventParticles,
                       const std::vector<TH1*>& histograms)
 {
-  for (auto it = eventParticles.begin(); it != --eventParticles.end(); ++it) {
+  for (auto it = eventParticles.begin(); it != eventParticles.end() - 1; ++it) {
     const lab::Particle& latest{eventParticles.back()};
     const double invmass{lab::invariantMass(latest, *it)};
     const bool haveSameCharge{
@@ -342,8 +342,9 @@ void streamTypeIDInfo(TH1* histo) {
   std::cout << "Particle Generation Ratios (TypeID)" << '\n'
             << "Total of Particles Generated: " << histo->GetEntries() << '\n';
   for (int i{1}; i < 8; ++i) {
-    std::cout << "TypeID: " << i - 1 << "\t\t" << "Entries: " << histo->GetBinContent(i) << '\t'
-              << "(" << histo->GetBinContent(i) / histo->GetEntries() << "%)" << '\n';
+    std::cout << "TypeID: " << i - 1 << "\t\t" << "Entries: " << histo->GetBinContent(i)
+              << " +/- "  << histo->GetBinError(i) << '\t'
+              << "(" << histo->GetBinContent(i) / histo->GetEntries() * 100 << "%)" << '\n';
   }
   std::cout << '\n';
 }
