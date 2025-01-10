@@ -22,7 +22,7 @@ lab::Array3D sphericalToCartesian(double radius, double theta, double phi);
 void setStyle();
 void setupHistograms(std::vector<TH1*>& histograms);
 void addParticleTypes();
-void streamImpulseFit(TF1* fn);
+void streamImpulseFit(TH1F* histo, TF1* fn);
 void streamPolarFit(TH1* histo, TF1* fn);
 void streamAzimuthalFit(TH1* histo, TF1* fn);
 void streamInvMassFit0(TF1* fn);
@@ -134,7 +134,7 @@ void runAnalysis(const std::vector<TH1*>& histograms)
   polarFitHisto->Fit(polarAngleFunction, "R");
   azimuthalFitHisto->Fit(azimuthalAngleFunction, "R");
   streamTypeIDInfo(histograms[0]);
-  streamImpulseFit(expImpulseFunction);
+  streamImpulseFit(histograms[1], expImpulseFunction);
   streamPolarFit(histograms[2], polarAngleFunction);
   streamAzimuthalFit(histograms[3], azimuthalAngleFunction);
 
@@ -267,15 +267,15 @@ void addParticleTypes(){
   lab::Particle::addParticleType("K*", 0.89166, 0, 0.050);
 }
 
-void streamImpulseFit(TF1* fn) {
+void streamImpulseFit(TH1* histo, TF1* fn) {
   std::cout << "Exponential Fit: Impulse Magnitude" << '\n';
-  if (std::abs((-fn->GetParameter(1)) - 1.) < fn->GetParError(1))
-    std::cout << "Fit mean IS compatible with the true mean of 1GeV" << '\n';
+  if (std::abs(histo->GetMean() - 1.) < histo->GetMeanError())
+    std::cout << "Sample mean IS compatible with the true mean of 1GeV" << '\n';
   else 
-    std::cout << "Fit mean IS NOT compatible with the true mean of 1GeV" << '\n';
-  std::cout << "Fit Mean (Decay Coefficient): " << -fn->GetParameter(1) << '\n'
-            << "Decay Coefficient Error: "      << fn->GetParError(1) << '\n'
-            << "Fit Amplitude Coefficient: "    << fn->GetParameter(0) << '\n'     
+    std::cout << "Sample mean IS NOT compatible with the true mean of 1GeV" << '\n';
+  std::cout << "Sample Mean: " << histo->GetMean() << " +/- " << histo->GetMeanError() << '\n'
+            << "Fit Decay Coefficient: "      << fn->GetParameter(1) << " +/- " << fn->GetParError(1) << '\n'
+            << "Fit Amplitude Coefficient: "    << fn->GetParameter(0) << " +/- " << fn->GetParError(0) << '\n'     
             << "Reduced Chi Squared: "          << fn->GetChisquare() / fn->GetNDF() << '\n'
             << "Fit Probability: "              << fn->GetProb() << '\n'
             << '\n';
@@ -306,7 +306,6 @@ void streamAzimuthalFit(TH1* histo, TF1* fn) {
 }
 
 void streamInvMassFit0(TF1* fn) {
-  //no sample mean?
   std::cout << "Gauss Fit: True Decayment Particles' Invariant Mass" << '\n'
             << "Fit Amplitude Coefficient: "  << fn->GetParameter(0) << "+/-" << fn->GetParError(0) << '\n'
             << "Fit Mean: "                   << fn->GetParameter(1) << "+/-" << fn->GetParError(1) << '\n'
@@ -317,7 +316,6 @@ void streamInvMassFit0(TF1* fn) {
 }
 
 void streamInvMassFit1(TF1* fn) {
-  //no sample mean?
   std::cout << "Gauss Fit: Histogram Difference of Invariant Mass Between Same Charge and Opposite Charge Pairs of Particles" << '\n'
             << "Fit Amplitude Coefficient: "  << fn->GetParameter(0) << "+/-" << fn->GetParError(0) << '\n'
             << "Fit Mean: "                   << fn->GetParameter(1) << "+/-" << fn->GetParError(1) << '\n'
@@ -328,7 +326,6 @@ void streamInvMassFit1(TF1* fn) {
 }
 
 void streamInvMassFit2(TF1* fn) {
-  //no sample mean?
   std::cout << "Gauss Fit: Histogram Difference of Invariant Mass Between Same Charge and Opposite Charge (K, Pi) Pairs of Particles" << '\n'
             << "Fit Amplitude Coefficient: "  << fn->GetParameter(0) << "+/-" << fn->GetParError(0) << '\n'
             << "Fit Mean: "                   << fn->GetParameter(1) << "+/-" << fn->GetParError(1) << '\n'
